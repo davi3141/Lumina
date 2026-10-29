@@ -14,6 +14,7 @@ import {
   User,
   Shield,
   Layers,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CURRENT_USER } from "@/lib/mock-data";
@@ -28,6 +29,7 @@ const NAV_ITEMS = [
   { name: "Feed de Resumos", href: "/summaries", icon: Sparkles },
   { name: "Central Canva", href: "/canva", icon: Palette },
   { name: "Meu Perfil", href: "/profile", icon: User },
+  { name: "Como Usar (Guia)", href: "/guide", icon: HelpCircle },
 ];
 
 export function Sidebar({ mobileOpen = false, setMobileOpen }: { mobileOpen?: boolean; setMobileOpen?: (v: boolean) => void }) {

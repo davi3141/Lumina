@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
 import { NoticeBanner } from "@/components/dashboard/notice-banner";
 import { DeadlineWidget } from "@/components/dashboard/deadline-widget";
+import { InteractiveGuideModal } from "@/components/guide/interactive-guide-modal";
 import {
   CURRENT_USER,
   INITIAL_ROOMS,
@@ -24,6 +25,8 @@ import {
   Layers,
   Copy,
   Check,
+  HelpCircle,
+  Lightbulb,
 } from "lucide-react";
 import Link from "next/link";
 import { AppleButton } from "@/components/ui/apple-button";
@@ -32,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 export default function DashboardPage() {
   const [activeRoom, setActiveRoom] = useState(INITIAL_ROOMS[0]);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(activeRoom.invite_code);
@@ -112,6 +116,47 @@ export default function DashboardPage() {
                 </AppleButton>
               </Link>
             </div>
+          </div>
+        </section>
+
+        {/* Interactive Guide Quick Banner */}
+        <section className="rounded-3xl glass-panel p-5 sm:p-6 border border-purple-500/20 bg-gradient-to-r from-purple-500/10 via-blue-500/5 to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="h-10 w-10 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+              <HelpCircle className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
+                  Guia para Iniciantes
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-300 font-bold">
+                  7 Ferramentas
+                </span>
+              </div>
+              <h3 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                Aprenda a Usar Todas as Tarefas e Recursos da Plataforma
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                Passo a passo simples de como marcar prazos, usar o Canva, entrar em salas e escrever no caderno Notion.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <AppleButton
+              variant="glass"
+              size="sm"
+              onClick={() => setGuideModalOpen(true)}
+            >
+              <span>Tour Rápido</span>
+            </AppleButton>
+            <Link href="/guide">
+              <AppleButton variant="primary" size="sm">
+                <span>Ver Manual Completo</span>
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </AppleButton>
+            </Link>
           </div>
         </section>
 
@@ -283,6 +328,12 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Interactive Guide Tour Modal */}
+        <InteractiveGuideModal
+          isOpen={guideModalOpen}
+          onClose={() => setGuideModalOpen(false)}
+        />
       </div>
     </AppShell>
   );

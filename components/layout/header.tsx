@@ -8,10 +8,12 @@ import {
   ChevronDown,
   Sparkles,
   Check,
+  HelpCircle,
 } from "lucide-react";
 import { AppleButton } from "@/components/ui/apple-button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { JoinRoomModal } from "@/components/rooms/join-room-modal";
+import { InteractiveGuideModal } from "@/components/guide/interactive-guide-modal";
 import { INITIAL_ROOMS, CURRENT_USER, Room } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 
@@ -27,6 +29,7 @@ export function Header({
   onSelectRoom,
 }: HeaderProps) {
   const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
   const [roomDropdownOpen, setRoomDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
@@ -108,6 +111,18 @@ export function Header({
 
         {/* Right: Actions, Theme, Notifications, Avatar */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Guide Quick Button */}
+          <AppleButton
+            variant="glass"
+            size="sm"
+            onClick={() => setGuideModalOpen(true)}
+            className="hidden sm:inline-flex"
+            title="Como usar todas as tarefas"
+          >
+            <HelpCircle className="h-3.5 w-3.5 text-purple-500" />
+            <span>Como Usar</span>
+          </AppleButton>
+
           {/* Join with Code Button */}
           <AppleButton
             variant="glass"
@@ -190,6 +205,12 @@ export function Header({
         onJoinSuccess={(name) => {
           alert(`Você agora é membro da sala: ${name}!`);
         }}
+      />
+
+      {/* Interactive Guide Modal */}
+      <InteractiveGuideModal
+        isOpen={guideModalOpen}
+        onClose={() => setGuideModalOpen(false)}
       />
     </>
   );
