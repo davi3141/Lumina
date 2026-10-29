@@ -1,24 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import { SummaryItem, INITIAL_SUMMARIES, CURRENT_USER } from "@/lib/mock-data";
+import { SummaryItem, INITIAL_SUMMARIES } from "@/lib/mock-data";
 import {
   Heart,
   BookOpen,
-  Share2,
-  ExternalLink,
   Plus,
   Search,
-  Filter,
-  Sparkles,
   Download,
+  FileText,
 } from "lucide-react";
 import { AppleButton } from "@/components/ui/apple-button";
 import { Badge } from "@/components/ui/badge";
 import { AppleModal } from "@/components/ui/apple-modal";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/lib/user-context";
 
 export function SummariesFeed() {
+  const { user } = useUser();
   const [summaries, setSummaries] = useState<SummaryItem[]>(INITIAL_SUMMARIES);
   const [search, setSearch] = useState("");
   const [selectedSubject, setSelectedSubject] = useState<string>("Todos");
@@ -27,9 +26,8 @@ export function SummariesFeed() {
 
   // New Summary Form State
   const [newTitle, setNewTitle] = useState("");
-  const [newSubject, setNewSubject] = useState("Engenharia");
+  const [newSubject, setNewSubject] = useState("Geral");
   const [newDescription, setNewDescription] = useState("");
-  const [newCanvaUrl, setNewCanvaUrl] = useState("");
 
   const handleToggleLike = (id: string) => {
     setSummaries((prev) =>
@@ -53,15 +51,14 @@ export function SummariesFeed() {
 
     const newItem: SummaryItem = {
       id: `sum-${Date.now()}`,
-      room_id: "room-alpha",
-      author: CURRENT_USER,
+      room_id: "sala-principal",
+      author: user,
       title: newTitle.trim(),
       subject: newSubject,
       description: newDescription.trim(),
-      canva_embed_url: newCanvaUrl.trim() || undefined,
       likes_count: 1,
       is_liked: true,
-      tags: [newSubject, "Resumo Colaborativo"],
+      tags: [newSubject, "Resumo da Turma"],
       created_at: new Date().toISOString(),
     };
 
@@ -69,7 +66,6 @@ export function SummariesFeed() {
     setIsPublishModalOpen(false);
     setNewTitle("");
     setNewDescription("");
-    setNewCanvaUrl("");
   };
 
   const subjects = ["Todos", ...Array.from(new Set(summaries.map((s) => s.subject)))];
@@ -94,22 +90,22 @@ export function SummariesFeed() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar resumos..."
-              className="w-full pl-9 pr-3 py-2 text-xs rounded-2xl glass-subtle border text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Buscar resumos e anotações..."
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-2xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
             {subjects.map((subj) => (
               <button
                 key={subj}
                 onClick={() => setSelectedSubject(subj)}
                 className={cn(
-                  "px-3 py-1.5 rounded-full text-xs font-medium apple-spring cursor-pointer shrink-0",
+                  "px-3 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all",
                   selectedSubject === subj
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "glass-subtle text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "glass-subtle text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 border border-zinc-200 dark:border-zinc-800"
                 )}
               >
                 {subj}
@@ -123,19 +119,19 @@ export function SummariesFeed() {
           variant="primary"
           size="md"
           onClick={() => setIsPublishModalOpen(true)}
-          className="shrink-0"
+          className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white"
         >
           <Plus className="h-4 w-4" />
           <span>Publicar Resumo</span>
         </AppleButton>
       </div>
 
-      {/* Feed Cards Grid (Knowunity-style) */}
+      {/* Feed Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filtered.map((item) => (
           <div
             key={item.id}
-            className="rounded-3xl glass-panel p-5 border flex flex-col justify-between hover:shadow-lg apple-spring group"
+            className="rounded-3xl glass-panel p-5 border border-zinc-300 dark:border-zinc-800 flex flex-col justify-between hover:shadow-md apple-spring group"
           >
             <div>
               {/* Card Header: Author & Subject */}
@@ -144,13 +140,13 @@ export function SummariesFeed() {
                   <img
                     src={item.author.avatar_url}
                     alt={item.author.display_name}
-                    className="h-7 w-7 rounded-full object-cover ring-1 ring-zinc-300 dark:ring-zinc-700"
+                    className="h-8 w-8 rounded-xl object-cover shadow-2xs"
                   />
                   <div>
-                    <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                    <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
                       {item.author.display_name}
                     </p>
-                    <span className="text-[10px] text-zinc-400">
+                    <span className="text-[10px] text-zinc-500">
                       {item.author.custom_role}
                     </span>
                   </div>
@@ -162,10 +158,10 @@ export function SummariesFeed() {
               </div>
 
               {/* Title & Description */}
-              <h4 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-500 apple-spring line-clamp-2">
+              <h4 className="text-base font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 apple-spring line-clamp-2">
                 {item.title}
               </h4>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2 line-clamp-3 leading-relaxed">
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-2 line-clamp-3 leading-relaxed">
                 {item.description}
               </p>
 
@@ -174,7 +170,7 @@ export function SummariesFeed() {
                 {item.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-[10px] px-2 py-0.5 rounded-md bg-zinc-200/50 dark:bg-zinc-800/60 text-zinc-600 dark:text-zinc-300 font-medium"
+                    className="text-[10px] px-2 py-0.5 rounded-md bg-zinc-200/80 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-semibold"
                   >
                     #{tag}
                   </span>
@@ -183,43 +179,36 @@ export function SummariesFeed() {
             </div>
 
             {/* Card Footer: Likes & Action */}
-            <div className="flex items-center justify-between pt-4 mt-4 border-t border-zinc-200/50 dark:border-zinc-800/60">
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-zinc-200 dark:border-zinc-800">
               <button
                 onClick={() => handleToggleLike(item.id)}
                 className={cn(
-                  "flex items-center gap-1.5 text-xs font-medium apple-spring cursor-pointer px-2 py-1 rounded-full",
+                  "flex items-center gap-1.5 text-xs font-bold apple-spring cursor-pointer px-2.5 py-1 rounded-full transition-all",
                   item.is_liked
-                    ? "text-rose-500 bg-rose-500/10"
-                    : "text-zinc-400 hover:text-rose-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    ? "text-rose-600 bg-rose-500/15"
+                    : "text-zinc-500 hover:text-rose-600 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 )}
               >
                 <Heart
-                  className={cn("h-4 w-4", item.is_liked && "fill-rose-500")}
+                  className={cn("h-4 w-4", item.is_liked && "fill-rose-600")}
                 />
                 <span>{item.likes_count}</span>
               </button>
 
-              <div className="flex items-center gap-2">
-                {item.canva_embed_url && (
-                  <span className="text-[10px] px-2 py-1 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 font-bold border border-purple-500/20">
-                    Canva Integrado
-                  </span>
-                )}
-                <AppleButton
-                  variant="glass"
-                  size="sm"
-                  onClick={() => setActiveModalItem(item)}
-                >
-                  <BookOpen className="h-3.5 w-3.5" />
-                  <span>Estudar</span>
-                </AppleButton>
-              </div>
+              <AppleButton
+                variant="glass"
+                size="sm"
+                onClick={() => setActiveModalItem(item)}
+              >
+                <BookOpen className="h-3.5 w-3.5 text-blue-500" />
+                <span>Ler Resumo</span>
+              </AppleButton>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Modal: View Material / Canva Embed */}
+      {/* Modal: View Material */}
       {activeModalItem && (
         <AppleModal
           isOpen={!!activeModalItem}
@@ -228,41 +217,26 @@ export function SummariesFeed() {
           description={`Publicado por ${activeModalItem.author.display_name} • ${activeModalItem.subject}`}
         >
           <div className="space-y-4 text-xs">
-            <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">
-              {activeModalItem.description}
-            </p>
-
-            {activeModalItem.canva_embed_url ? (
-              <div className="rounded-2xl overflow-hidden border border-zinc-200/50 dark:border-zinc-800/60 bg-zinc-950 p-1">
-                <div className="aspect-video w-full rounded-xl overflow-hidden bg-zinc-900 flex items-center justify-center relative">
-                  <iframe
-                    src={activeModalItem.canva_embed_url}
-                    title={activeModalItem.title}
-                    allowFullScreen
-                    className="w-full h-full border-0"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div className="p-8 rounded-2xl glass-subtle text-center text-zinc-400 border">
-                <BookOpen className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p>Material de texto integral disponível para download.</p>
-              </div>
-            )}
+            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <p className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed font-medium whitespace-pre-line">
+                {activeModalItem.description}
+              </p>
+            </div>
 
             <div className="flex items-center justify-between pt-2">
-              <span className="text-zinc-400">
-                {activeModalItem.likes_count} estudantes curtiram este resumo
+              <span className="text-zinc-500 font-medium">
+                ❤️ {activeModalItem.likes_count} colegas curtiram
               </span>
               <AppleButton
                 variant="primary"
                 size="md"
                 onClick={() => {
-                  alert("Download do PDF do resumo iniciado!");
+                  alert("Download do PDF iniciado!");
                 }}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Download className="h-4 w-4" />
-                <span>Baixar Material (PDF)</span>
+                <span>Salvar Material (PDF)</span>
               </AppleButton>
             </div>
           </div>
@@ -273,54 +247,49 @@ export function SummariesFeed() {
       <AppleModal
         isOpen={isPublishModalOpen}
         onClose={() => setIsPublishModalOpen(false)}
-        title="Publicar Material de Estudo"
+        title="📝 Publicar Material de Estudo"
         description="Compartilhe seu resumo com a comunidade da sala de aula."
       >
-        <form onSubmit={handlePublish} className="space-y-3.5 text-xs">
+        <form onSubmit={handlePublish} className="space-y-4 text-xs">
           <div>
-            <label className="block text-zinc-500 mb-1 font-medium">Título do Resumo</label>
+            <label className="block text-zinc-900 dark:text-zinc-100 font-bold mb-1 text-xs">
+              Título do Resumo <span className="text-rose-500">*</span>
+            </label>
             <input
               type="text"
               required
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="Ex: Resumo Geral de Álgebra Linear"
-              className="w-full px-3 py-2 rounded-xl glass-subtle border text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Ex: Resumo de Genética ou Fórmulas de Física"
+              className="w-full px-3 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
             />
           </div>
 
           <div>
-            <label className="block text-zinc-500 mb-1 font-medium">Disciplina</label>
+            <label className="block text-zinc-900 dark:text-zinc-100 font-bold mb-1 text-xs">
+              Disciplina
+            </label>
             <input
               type="text"
               required
               value={newSubject}
               onChange={(e) => setNewSubject(e.target.value)}
-              placeholder="Ex: Engenharia, Design, Biologia..."
-              className="w-full px-3 py-2 rounded-xl glass-subtle border text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Ex: Biologia, Matemática, História..."
+              className="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
             />
           </div>
 
           <div>
-            <label className="block text-zinc-500 mb-1 font-medium">Síntese / Descrição</label>
+            <label className="block text-zinc-900 dark:text-zinc-100 font-bold mb-1 text-xs">
+              Conteúdo / Síntese do Resumo <span className="text-rose-500">*</span>
+            </label>
             <textarea
-              rows={3}
+              rows={4}
               required
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
-              placeholder="Escreva os tópicos principais abordados neste material..."
-              className="w-full px-3 py-2 rounded-xl glass-subtle border text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-zinc-500 mb-1 font-medium">Link do Canva Embed (Opcional)</label>
-            <input
-              type="url"
-              value={newCanvaUrl}
-              onChange={(e) => setNewCanvaUrl(e.target.value)}
-              placeholder="https://www.canva.com/design/.../view?embed"
-              className="w-full px-3 py-2 rounded-xl glass-subtle border text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-purple-500"
+              placeholder="Escreva os conceitos principais que você resumiu para os colegas..."
+              className="w-full p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none font-medium"
             />
           </div>
 
@@ -333,7 +302,7 @@ export function SummariesFeed() {
             >
               Cancelar
             </AppleButton>
-            <AppleButton type="submit" variant="primary" size="md">
+            <AppleButton type="submit" variant="primary" size="md" className="bg-blue-600 hover:bg-blue-700 text-white">
               Publicar no Feed
             </AppleButton>
           </div>

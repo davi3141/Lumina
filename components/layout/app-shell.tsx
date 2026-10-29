@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
+import { MobileNav } from "@/components/layout/mobile-nav";
 import { useUser } from "@/lib/user-context";
+import { UserOnboardingModal } from "@/components/auth/user-onboarding-modal";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -20,10 +22,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onSelectRoom={setSelectedRoom}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto animate-in fade-in duration-300">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24 md:pb-8 animate-in fade-in duration-300">
           {children}
         </main>
       </div>
+
+      {/* iOS-style Bottom Navigation for Mobile */}
+      <MobileNav />
+
+      {/* Onboarding Modal for Custom Profile */}
+      <UserOnboardingModal />
     </div>
   );
 }

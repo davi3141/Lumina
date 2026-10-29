@@ -1,5 +1,5 @@
 import React from "react";
-import { Pin, AlertCircle, Sparkles } from "lucide-react";
+import { Pin, AlertCircle } from "lucide-react";
 import { Notice } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 
@@ -8,7 +8,7 @@ export function NoticeBanner({ notices }: { notices: Notice[] }) {
   const activeNotice = notices[0];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl glass-panel p-5 sm:p-6 border border-zinc-200/50 dark:border-zinc-800/60 shadow-sm">
+    <div className="relative overflow-hidden rounded-3xl glass-panel p-5 sm:p-6 border border-zinc-300 dark:border-zinc-800 shadow-sm">
       {/* Decorative subtle ambient gradient */}
       <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-transparent blur-2xl pointer-events-none" />
 
@@ -19,7 +19,7 @@ export function NoticeBanner({ notices }: { notices: Notice[] }) {
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
                 Aviso Fixado pela Moderação
               </span>
               {activeNotice.priority === "urgent" && (
@@ -29,26 +29,26 @@ export function NoticeBanner({ notices }: { notices: Notice[] }) {
                 </Badge>
               )}
             </div>
-            <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
               {activeNotice.title}
             </h3>
-            <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 mt-1 max-w-2xl leading-relaxed">
               {activeNotice.content}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-200/40 dark:border-zinc-800/60">
+        <div className="flex items-center gap-2.5 sm:self-center shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-200 dark:border-zinc-800">
           <img
             src={activeNotice.author.avatar}
             alt={activeNotice.author.name}
-            className="h-7 w-7 rounded-full object-cover ring-1 ring-zinc-300 dark:ring-zinc-700"
+            className="h-8 w-8 rounded-xl object-cover ring-1 ring-zinc-300 dark:ring-zinc-700 shadow-2xs"
           />
           <div className="text-left">
-            <p className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
+            <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
               {activeNotice.author.name}
             </p>
-            <span className="text-[10px] text-zinc-400">
+            <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
               {activeNotice.author.role}
             </span>
           </div>

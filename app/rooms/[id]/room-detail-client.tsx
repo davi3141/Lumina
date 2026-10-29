@@ -7,7 +7,7 @@ import { AppleButton } from "@/components/ui/apple-button";
 import { Badge } from "@/components/ui/badge";
 import { AdminModal } from "@/components/rooms/admin-modal";
 import { DeadlineWidget } from "@/components/dashboard/deadline-widget";
-import { RoomChat } from "@/components/chat/room-chat";
+import { UnifiedChat } from "@/components/chat/unified-chat";
 import {
   Users,
   Copy,
@@ -15,10 +15,11 @@ import {
   Settings,
   Calendar,
   MessageSquare,
-  Presentation,
   ArrowLeft,
-  ExternalLink,
   Share2,
+  Lock,
+  Crown,
+  Shield,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -27,11 +28,12 @@ interface RoomDetailClientProps {
 }
 
 export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
-  const { rooms, user, tasks, messages } = useUser();
+  const { rooms, user, tasks, isRoomAdmin, roomMembers } = useUser();
 
-  const [activeTab, setActiveTab] = useState<"all" | "tasks" | "chat" | "canva" | "members">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "tasks" | "chat" | "pv" | "members">("all");
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [targetPvUser, setTargetPvUser] = useState<string | undefined>(undefined);
 
   // Encontra a sala atual nos dados do usuário ou usa a primeira disponível
   const room = rooms.find((r) => r.id === roomId) || rooms[0];
@@ -61,17 +63,24 @@ export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
     );
   }
 
+  const isAdmin = isRoomAdmin(room.id);
   // Tarefas desta sala específica
   const roomTasks = tasks.filter((t) => t.room_id === room.id || room.id === "sala-principal");
-  // Mensagens do chat desta sala
-  const roomMessages = messages.filter((m) => m.room_id === room.id);
+
+  const startPvWith = (memberId: string) => {
+    setTargetPvUser(memberId);
+    setActiveTab("pv");
+  };
 
   return (
     <AppShell>
       <div className="space-y-6">
         {/* Back navigation & Room Header Banner */}
         <div className="flex items-center justify-between">
-          <Link href="/rooms" className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 apple-spring">
+          <Link
+            href="/rooms"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 apple-spring"
+          >
             <ArrowLeft className="h-4 w-4" />
             <span>Voltar para todas as salas</span>
           </Link>
@@ -96,14 +105,16 @@ export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
               )}
             </AppleButton>
 
+            {/* Botão Admin com destaque */}
             <AppleButton
-              variant="glass"
+              variant={isAdmin ? "primary" : "glass"}
               size="sm"
               onClick={() => setIsAdminOpen(true)}
-              title="Configurações & Painel Administrativo"
+              title="Configurações e Gestão da Sala"
+              className={isAdmin ? "bg-purple-600 hover:bg-purple-700 text-white" : ""}
             >
-              <Settings className="h-3.5 w-3.5" />
-              <span>Admin da Sala</span>
+              {isAdmin ? <Crown className="h-3.5 w-3.5" /> : <Settings className="h-3.5 w-3.5" />}
+              <span>{isAdmin ? "Painel do Admin 👑" : "Ver Admin"}</span>
             </AppleButton>
           </div>
         </div>
@@ -118,9 +129,14 @@ export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
                 <Badge variant="blue" size="md">
                   {room.subject}
                 </Badge>
-                <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">
-                  {room.members_count} participante(s) cadastrado(s)
+                <span className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold">
+                  {room.members_count} aluno(s) na turma
                 </span>
+                {isAdmin && (
+                  <Badge variant="purple" size="sm">
+                    <Crown className="h-3 w-3" /> Você é o Criador / Admin
+                  </Badge>
+                )}
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -134,26 +150,26 @@ export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
 
             {/* Quick stats / Share pill */}
             <div className="p-4 rounded-2xl glass-subtle border border-zinc-300 dark:border-zinc-700 shrink-0 text-center space-y-1">
-              <span className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 block uppercase tracking-wider">
-                Convide seus Amigos
+              <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block uppercase tracking-wider">
+                Código de Entrada
               </span>
               <p className="text-lg font-mono font-extrabold text-blue-600 dark:text-blue-400">
                 {room.invite_code}
               </p>
-              <p className="text-[10px] text-zinc-500">
-                Qualquer um com esse código entra na sala
+              <p className="text-[10px] text-zinc-500 font-medium">
+                Passe aos colegas para entrarem
               </p>
             </div>
           </div>
         </div>
 
         {/* Navigation Tabs to Switch Views */}
-        <div className="flex rounded-2xl bg-zinc-200/80 dark:bg-zinc-800/80 p-1.5 text-xs font-semibold overflow-x-auto">
+        <div className="flex rounded-2xl bg-zinc-200/80 dark:bg-zinc-800/80 p-1.5 text-xs font-bold overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab("all")}
             className={`px-4 py-2 rounded-xl apple-spring cursor-pointer shrink-0 ${
               activeTab === "all"
-                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm"
+                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-xs"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
             }`}
           >
@@ -163,7 +179,7 @@ export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
             onClick={() => setActiveTab("tasks")}
             className={`px-4 py-2 rounded-xl apple-spring cursor-pointer shrink-0 flex items-center gap-1.5 ${
               activeTab === "tasks"
-                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm"
+                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-xs"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
             }`}
           >
@@ -174,7 +190,7 @@ export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
             onClick={() => setActiveTab("chat")}
             className={`px-4 py-2 rounded-xl apple-spring cursor-pointer shrink-0 flex items-center gap-1.5 ${
               activeTab === "chat"
-                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm"
+                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-xs"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
             }`}
           >
@@ -182,187 +198,178 @@ export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
             <span>Chat da Turma</span>
           </button>
           <button
-            onClick={() => setActiveTab("canva")}
+            onClick={() => setActiveTab("pv")}
             className={`px-4 py-2 rounded-xl apple-spring cursor-pointer shrink-0 flex items-center gap-1.5 ${
-              activeTab === "canva"
-                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm"
+              activeTab === "pv"
+                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-xs"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
             }`}
           >
-            <Presentation className="h-3.5 w-3.5 text-purple-500" />
-            <span>Slides Canva</span>
+            <Lock className="h-3.5 w-3.5 text-purple-500" />
+            <span>Mensagens Privadas (PV)</span>
           </button>
           <button
             onClick={() => setActiveTab("members")}
             className={`px-4 py-2 rounded-xl apple-spring cursor-pointer shrink-0 flex items-center gap-1.5 ${
               activeTab === "members"
-                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm"
+                ? "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-xs"
                 : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
             }`}
           >
             <Users className="h-3.5 w-3.5" />
-            <span>Membros</span>
+            <span>Colegas & Cargos ({roomMembers.length + 1})</span>
           </button>
         </div>
 
         {/* Tab Content: All-in-one Overview */}
         {(activeTab === "all" || activeTab === "tasks") && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Mural de Tarefas desta Sala */}
             <div className={activeTab === "tasks" ? "lg:col-span-12" : "lg:col-span-7"}>
               <DeadlineWidget initialTasks={roomTasks} />
             </div>
 
-            {/* Right: Canva Presentation & Chat Sneak Peek */}
             {activeTab === "all" && (
               <div className="lg:col-span-5 space-y-6">
-                {/* Canva Embed Card */}
-                <div className="rounded-3xl glass-panel p-6 border border-zinc-300 dark:border-zinc-800 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                        <Presentation className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                          Apresentação da Sala
-                        </h3>
-                        <p className="text-[11px] text-zinc-500">
-                          Canva Slides Oficial
-                        </p>
-                      </div>
-                    </div>
-
-                    <a
-                      href={room.canva_presentation_url?.replace("?embed", "") || "https://canva.com"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
-                    >
-                      <span>Abrir</span>
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  </div>
-
-                  <div className="rounded-2xl overflow-hidden border border-zinc-300 dark:border-zinc-700 bg-zinc-950">
-                    <div className="aspect-video w-full bg-zinc-900 flex items-center justify-center">
-                      <iframe
-                        src={room.canva_presentation_url || "https://www.canva.com/design/DAFv3sI7p9k/view?embed"}
-                        title="Apresentação Canva"
-                        allowFullScreen
-                        className="w-full h-full border-0"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Chat Box */}
-                <div className="rounded-3xl glass-panel p-6 border border-zinc-300 dark:border-zinc-800 space-y-3">
+                {/* Chat Sneak Peek Box */}
+                <div className="rounded-3xl glass-panel p-6 border border-zinc-300 dark:border-zinc-800 space-y-3 shadow-xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
                         <MessageSquare className="h-4 w-4" />
                       </div>
                       <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                        Chat da Sala
+                        Chat da Turma & PV
                       </h3>
                     </div>
                     <button
                       onClick={() => setActiveTab("chat")}
-                      className="text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
+                      className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
                     >
-                      Abrir Tela Cheia ↗
+                      Abrir Completo ↗
                     </button>
                   </div>
 
-                  <p className="text-xs text-zinc-600 dark:text-zinc-400">
-                    Converse com os outros alunos cadastrados na sala <strong>{room.name}</strong>.
+                  <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                    Converse com os outros alunos ou inicie um chat privado direto no PV com qualquer colega.
                   </p>
 
-                  <AppleButton
-                    variant="primary"
-                    size="md"
-                    className="w-full"
-                    onClick={() => setActiveTab("chat")}
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    <span>Participar do Chat da Turma</span>
-                  </AppleButton>
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <AppleButton
+                      variant="primary"
+                      size="sm"
+                      onClick={() => setActiveTab("chat")}
+                      className="justify-center text-xs"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      <span>Chat Geral</span>
+                    </AppleButton>
+
+                    <AppleButton
+                      variant="glass"
+                      size="sm"
+                      onClick={() => setActiveTab("pv")}
+                      className="justify-center text-xs text-purple-600 dark:text-purple-400"
+                    >
+                      <Lock className="h-3.5 w-3.5" />
+                      <span>Chat PV (Privado)</span>
+                    </AppleButton>
+                  </div>
+                </div>
+
+                {/* Colegas Rápidos */}
+                <div className="rounded-3xl glass-panel p-6 border border-zinc-300 dark:border-zinc-800 space-y-3 shadow-xs">
+                  <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 flex items-center justify-between">
+                    <span>Colegas na Sala</span>
+                    <button
+                      onClick={() => setActiveTab("members")}
+                      className="text-xs font-semibold text-blue-600 hover:underline"
+                    >
+                      Ver Todos
+                    </button>
+                  </h3>
+
+                  <div className="space-y-2">
+                    {roomMembers.slice(0, 3).map((m) => (
+                      <div
+                        key={m.id}
+                        className="flex items-center justify-between p-2 rounded-xl bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800"
+                      >
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={m.avatar_url}
+                            alt={m.name}
+                            className="h-8 w-8 rounded-lg object-cover shadow-2xs"
+                          />
+                          <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                            {m.name}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => startPvWith(m.id)}
+                          className="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 text-[11px] font-bold flex items-center gap-1"
+                        >
+                          <Lock className="h-2.5 w-2.5" />
+                          PV
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Tab Content: Dedicated Chat */}
+        {/* Tab Content: Dedicated Chat (Geral) */}
         {activeTab === "chat" && (
-          <RoomChat room={room} initialMessages={roomMessages} />
+          <UnifiedChat room={room} defaultTab="room" />
         )}
 
-        {/* Tab Content: Dedicated Canva */}
-        {activeTab === "canva" && (
-          <div className="rounded-3xl glass-panel p-6 border border-zinc-300 dark:border-zinc-800 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                  Slides & Apresentações do Canva
-                </h3>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  Visualização ao vivo dos materiais criados no Canva para a turma.
-                </p>
-              </div>
-
-              <a
-                href={room.canva_presentation_url?.replace("?embed", "") || "https://canva.com"}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <AppleButton variant="primary" size="md">
-                  <span>Editar no Canva</span>
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </AppleButton>
-              </a>
-            </div>
-
-            <div className="rounded-2xl overflow-hidden border border-zinc-300 dark:border-zinc-700 bg-zinc-950 shadow-inner">
-              <div className="aspect-video w-full bg-zinc-900 flex items-center justify-center">
-                <iframe
-                  src={room.canva_presentation_url || "https://www.canva.com/design/DAFv3sI7p9k/view?embed"}
-                  title="Apresentação Canva"
-                  allowFullScreen
-                  className="w-full h-full border-0"
-                />
-              </div>
-            </div>
-          </div>
+        {/* Tab Content: Dedicated Chat (PV) */}
+        {activeTab === "pv" && (
+          <UnifiedChat room={room} defaultTab="pv" targetUserId={targetPvUser} />
         )}
 
-        {/* Tab Content: Members */}
+        {/* Tab Content: Members & PV trigger */}
         {activeTab === "members" && (
-          <div className="rounded-3xl glass-panel p-6 border border-zinc-300 dark:border-zinc-800 space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="rounded-3xl glass-panel p-6 border border-zinc-300 dark:border-zinc-800 space-y-4 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                  Participantes da Sala
+                  Participantes & Cargos da Sala
                 </h3>
-                <p className="text-xs text-zinc-500 mt-0.5">
-                  Alunos que ingressaram nesta sala com o código <strong>{room.invite_code}</strong>.
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  Clique em "Conversar no PV" para abrir um chat particular com qualquer colega.
                 </p>
               </div>
 
-              <AppleButton variant="glass" size="sm" onClick={handleCopyCode}>
-                <Share2 className="h-3.5 w-3.5 text-blue-500" />
-                <span>Compartilhar Código</span>
-              </AppleButton>
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <AppleButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setIsAdminOpen(true)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                  >
+                    <Crown className="h-3.5 w-3.5" />
+                    <span>Gerenciar Cargos (Admin)</span>
+                  </AppleButton>
+                )}
+                <AppleButton variant="glass" size="sm" onClick={handleCopyCode}>
+                  <Share2 className="h-3.5 w-3.5 text-blue-500" />
+                  <span>Código de Convite</span>
+                </AppleButton>
+              </div>
             </div>
 
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2.5 pt-2">
+              {/* O usuário atual */}
               <div className="p-3.5 rounded-2xl glass-subtle border border-zinc-300 dark:border-zinc-700 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <img
                     src={user.avatar_url}
                     alt={user.display_name}
-                    className="h-10 w-10 rounded-full object-cover ring-2 ring-blue-500"
+                    className="h-10 w-10 rounded-xl object-cover ring-2 ring-blue-500 shadow-xs"
                   />
                   <div>
                     <div className="flex items-center gap-2">
@@ -372,6 +379,11 @@ export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 font-bold">
                         (Você)
                       </span>
+                      {isAdmin && (
+                        <Badge variant="purple" size="sm">
+                          <Crown className="h-2.5 w-2.5" /> Admin da Sala
+                        </Badge>
+                      )}
                     </div>
                     <span className="text-[11px] text-zinc-600 dark:text-zinc-400">
                       {user.email} • {user.custom_role}
@@ -383,6 +395,58 @@ export default function RoomDetailClient({ roomId }: RoomDetailClientProps) {
                   {user.custom_role}
                 </Badge>
               </div>
+
+              {/* Colegas da turma */}
+              {roomMembers.map((member) => (
+                <div
+                  key={member.id}
+                  className="p-3.5 rounded-2xl glass-subtle border border-zinc-200 dark:border-zinc-800 flex items-center justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-all"
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={member.avatar_url}
+                      alt={member.name}
+                      className="h-10 w-10 rounded-xl object-cover shadow-xs"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <strong className="text-xs text-zinc-900 dark:text-zinc-100">
+                          {member.name}
+                        </strong>
+                        <Badge
+                          variant={
+                            member.role === "admin"
+                              ? "purple"
+                              : member.role === "moderator"
+                              ? "emerald"
+                              : "zinc"
+                          }
+                          size="sm"
+                        >
+                          {member.role === "admin"
+                            ? "Administrador"
+                            : member.role === "moderator"
+                            ? "Moderador"
+                            : "Membro"}
+                        </Badge>
+                      </div>
+                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                        {member.bio}
+                      </span>
+                    </div>
+                  </div>
+
+                  <AppleButton
+                    variant="glass"
+                    size="sm"
+                    onClick={() => startPvWith(member.id)}
+                    className="text-purple-600 dark:text-purple-400 font-bold"
+                  >
+                    <Lock className="h-3 w-3" />
+                    <span>Conversar no PV</span>
+                  </AppleButton>
+                </div>
+              ))}
             </div>
           </div>
         )}

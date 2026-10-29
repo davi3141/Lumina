@@ -11,14 +11,12 @@ import {
   FileText,
   MessageSquare,
   Sparkles,
-  Palette,
+  Bot,
   User,
-  Mail,
   ArrowRight,
-  CheckCircle2,
   ChevronRight,
-  HelpCircle,
-  Lightbulb,
+  Shield,
+  Lock,
 } from "lucide-react";
 
 interface GuideModalProps {
@@ -29,160 +27,137 @@ interface GuideModalProps {
 const GUIDE_SECTIONS = [
   {
     id: "tasks",
-    title: "1. Mural de Tarefas & Prazos",
+    title: "1. Mural de Prazos & Entregas",
     icon: CheckSquare,
-    badgeColor: "blue" as const,
-    subtitle: "Organização estilo Notion + Teams",
+    badgeColor: "emerald" as const,
+    subtitle: "Prazos definidos pelo Admin com aviso por e-mail",
     steps: [
       {
-        title: "Marcar tarefa como concluída",
-        desc: "Basta clicar no quadradinho ao lado da tarefa. Ela será riscada e o contador de pendências será atualizado na hora.",
+        title: "Quem define os prazos?",
+        desc: "Apenas o Administrador (quem criou a sala ou foi promovido) pode adicionar, editar ou excluir as entregas oficiais do mural.",
       },
       {
-        title: "Criar um novo prazo oficial",
-        desc: "Clique no botão azul '+ Novo Prazo'. Digite o nome da matéria, a data e hora limite, e se quiser, cole um link de slides do Canva.",
+        title: "Como os alunos concluem tarefas?",
+        desc: "Cada aluno clica no quadradinho ao lado da entrega para marcar como feita. Ela fica riscada e concluída para seu controle pessoal.",
       },
       {
         title: "Avisar a turma por e-mail (Resend)",
-        desc: "Ao lado de qualquer tarefa, clique no ícone da cartinha (Mail). O sistema enviará um alerta de e-mail gratuito avisando que o prazo está chegando.",
+        desc: "Ao lado de qualquer entrega, clique na cartinha (Mail). O sistema envia um alerta gratuito avisando que o prazo está chegando.",
       },
     ],
     actionLink: "/tasks",
-    actionText: "Ir para o Mural de Tarefas",
+    actionText: "Ir para o Mural de Prazos",
   },
   {
     id: "rooms",
-    title: "2. Salas Privadas & Códigos",
+    title: "2. Salas Privadas & Permissões",
     icon: DoorOpen,
     badgeColor: "purple" as const,
-    subtitle: "Acesso restrito para turmas e amigos",
+    subtitle: "Acesso por código único e gestão rigorosa de Admin",
     steps: [
       {
+        title: "Somente o criador é Admin",
+        desc: "Quem cria a sala vira Admin automaticamente. Ninguém entra como admin por padrão.",
+      },
+      {
+        title: "Promover colegas a Admin ou Moderador",
+        desc: "No Painel do Admin, o criador pode escolher quem vira Administrador ou Moderador, ou remover participantes.",
+      },
+      {
         title: "Entrar com Código Único",
-        desc: "No topo da tela ou na aba 'Salas de Aula', clique em 'Código de Sala'. Digite códigos como LUMINA-7821 ou APPLE-4092 para entrar instantaneamente.",
-      },
-      {
-        title: "Criar sua própria Sala",
-        desc: "Clique em '+ Criar Nova Sala'. O sistema gera na hora um código de convite exclusivo para você passar aos seus colegas.",
-      },
-      {
-        title: "Painel do Administrador",
-        desc: "Na sua sala, clique na engrenagem (Settings). Você pode ver quem entrou, expulsar ou banir usuários indisciplinados e fixar avisos importantes.",
+        desc: "Qualquer aluno com o código (ex: TURMA-2026) pode ingressar instantaneamente como membro participante.",
       },
     ],
     actionLink: "/rooms",
     actionText: "Explorar Salas de Aula",
   },
   {
-    id: "notes",
-    title: "3. Caderno Pessoal (Notion)",
-    icon: FileText,
-    badgeColor: "emerald" as const,
-    subtitle: "Bloco de anotações privado e flexível",
-    steps: [
-      {
-        title: "Criar e renomear páginas",
-        desc: "Clique em '+ Nova Nota'. Clique diretamente no título grande para escrever o nome da sua aula ou assunto.",
-      },
-      {
-        title: "Escolher o emoji de capa",
-        desc: "Selecione entre 🍎, 📝, ⚡, 💡, 📐, 🔬 para personalizar o ícone visual da sua nota.",
-      },
-      {
-        title: "Checklists e Resumos",
-        desc: "Escreva resumos, fórmulas e listas de tarefas no formato que desejar. Tudo fica salvo e sincronizado.",
-      },
-    ],
-    actionLink: "/notes",
-    actionText: "Abrir Caderno Notion",
-  },
-  {
-    id: "chat",
-    title: "4. Chat em Tempo Real",
+    id: "pv",
+    title: "3. Chat da Turma & Chat PV (Privado)",
     icon: MessageSquare,
     badgeColor: "blue" as const,
-    subtitle: "Tire dúvidas e converse com a turma",
+    subtitle: "Conversas em grupo e 1-a-1 com colegas",
     steps: [
       {
-        title: "Envio instantâneo de mensagens",
-        desc: "Digite no campo inferior e aperte Enter. As mensagens chegam instantaneamente para todos os alunos conectados à sala.",
+        title: "Chat da Turma (Geral)",
+        desc: "Canal aberto em tempo real para toda a sala tirar dúvidas gerais e alinhar atividades.",
       },
       {
-        title: "Anexar apresentações do Canva",
-        desc: "Clique no ícone de paleta de cores (🎨) ao lado do campo de texto, cole o link da sua apresentação e ela aparecerá com um botão de acesso direto no balão.",
+        title: "Chat PV (Mensagens 1-a-1)",
+        desc: "Acesse a aba 'Mensagens Privadas (PV)' ou clique no botão 'Conversar no PV' ao lado de qualquer colega para falar em particular.",
       },
       {
-        title: "Identificação por Cargos",
-        desc: "Cada colega tem um selo visível (Administrador, Moderador, Aluno Destaque), facilitando identificar os monitores da matéria.",
+        title: "Histórico salvo e seguro",
+        desc: "Suas conversas particulares ficam salvas e organizadas por colega de turma.",
       },
     ],
     actionLink: "/chat",
-    actionText: "Ir para o Chat",
+    actionText: "Abrir Chat & PV",
   },
   {
-    id: "summaries",
-    title: "5. Feed de Resumos (Knowunity)",
-    icon: Sparkles,
+    id: "lumi",
+    title: "4. Lumi IA (Tira-Dúvidas Amigável)",
+    icon: Bot,
     badgeColor: "amber" as const,
-    subtitle: "Compartilhamento de materiais de estudo",
+    subtitle: "Assistente inteligente simples e sem termos difíceis",
     steps: [
       {
-        title: "Estudar resumos com 1 clique",
-        desc: "Clique no botão 'Estudar' de qualquer cartão para abrir o visualizador de resumo ou apresentação completa incorporada.",
+        title: "Linguagem simples e direta",
+        desc: "A Lumi não usa palavras difíceis ou jargões chatos. Ela explica qualquer matéria de forma mastigada e gostosa de ler.",
       },
       {
-        title: "Curtir materiais dos colegas",
-        desc: "Clique no coraçãozinho para dar like no resumo de quem ajudou nos estudos.",
+        title: "Sugestões de estudo com 1 toque",
+        desc: "Use botões como 'Explique Simples', 'Como Organizar meu Tempo' ou 'Dica para Memorizar' para obter conselhos na hora.",
       },
       {
-        title: "Publicar o seu próprio material",
-        desc: "Clique em '+ Publicar Resumo', escolha a matéria, digite a descrição e opcionalmente insira o link de embed do Canva.",
+        title: "Disponível no celular",
+        desc: "Acesse pelo menu inferior do smartphone com apenas um toque na aba Lumi IA.",
       },
     ],
-    actionLink: "/summaries",
-    actionText: "Ver Feed de Resumos",
+    actionLink: "/lumi",
+    actionText: "Falar com a Lumi IA",
   },
   {
-    id: "canva",
-    title: "6. Central Canva",
-    icon: Palette,
-    badgeColor: "purple" as const,
-    subtitle: "Slides, cartazes e mapas mentais",
-    steps: [
-      {
-        title: "Apresentações incorporadas",
-        desc: "Você pode navegar pelos slides da turma diretamente dentro do Lumina sem precisar sair do site.",
-      },
-      {
-        title: "Atalhos rápidos para criar",
-        desc: "Use os botões do topo para abrir o Canva diretamente na tela de criar slides 16:9, cartazes A4 ou mapas mentais.",
-      },
-      {
-        title: "Importar qualquer design do Canva",
-        desc: "Cole qualquer link de apresentação no campo 'Cole aqui o link' e clique em 'Visualizar Embed' para testá-lo.",
-      },
-    ],
-    actionLink: "/canva",
-    actionText: "Abrir Central Canva",
-  },
-  {
-    id: "profile",
-    title: "7. Perfil & Cargos Personalizados",
+    id: "avatars",
+    title: "5. Catálogo de 40 Animais (Sem Fotos)",
     icon: User,
     badgeColor: "rose" as const,
-    subtitle: "Identidade visual e reputação na sala",
+    subtitle: "Avatares animais com fundos em cores sólidas",
     steps: [
       {
-        title: "Escolher seu cargo visível",
-        desc: "Escolha entre Administrador, Moderador, Aluno Destaque, Monitor Acadêmico ou Pesquisador.",
+        title: "Sem fotos reais de pessoas",
+        desc: "Para garantir privacidade e um design lindo, o Lumina usa avatares exclusivos de animais (Gatinho, Panda, Raposa, Coruja, etc.).",
       },
       {
-        title: "Mudar foto e bio",
-        desc: "Clique em um dos avatares rápidos e escreva uma biografia que descreve seus objetivos acadêmicos.",
+        title: "Fundos com uma cor sólida",
+        desc: "Cada animal possui um fundo em cor lisa e alto contraste, sem poluição visual.",
+      },
+      {
+        title: "Troque quando quiser",
+        desc: "Acesse 'Meu Perfil' ou clique no seu nome no topo para escolher qualquer um dos 40 animais.",
       },
     ],
     actionLink: "/profile",
-    actionText: "Personalizar Perfil",
+    actionText: "Escolher Avatar Animal",
+  },
+  {
+    id: "notes",
+    title: "6. Caderno Pessoal de Anotações",
+    icon: FileText,
+    badgeColor: "emerald" as const,
+    subtitle: "Bloco de notas privado para seus resumos",
+    steps: [
+      {
+        title: "Seu espaço particular",
+        desc: "Apenas você vê as suas notas. Perfeito para rascunhos, resumos de aulas e cronogramas pessoais.",
+      },
+      {
+        title: "Checklists interativos",
+        desc: "Crie listas de pendências e marque o que já concluiu ao longo da semana.",
+      },
+    ],
+    actionLink: "/notes",
+    actionText: "Abrir Caderno Pessoal",
   },
 ];
 
@@ -196,112 +171,96 @@ export function InteractiveGuideModal({ isOpen, onClose }: GuideModalProps) {
     <AppleModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Guia Completo: Como Usar Todas as Tarefas"
-      description="Aprenda em segundos como tirar o máximo proveito de cada ferramenta da Lumina."
+      title="📖 Guia Rápido do Lumina"
+      description="Veja como funcionam as salas, permissões de admin, chat no PV, Lumi IA e o catálogo de 40 animais."
     >
-      <div className="space-y-4">
-        {/* Horizontal Navigation Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 -mx-2 px-2">
+      <div className="flex flex-col md:flex-row gap-5">
+        {/* Left: Section Navigation Pills */}
+        <div className="flex md:flex-col gap-1.5 overflow-x-auto pb-2 md:pb-0 md:w-56 shrink-0 no-scrollbar">
           {GUIDE_SECTIONS.map((section, idx) => {
-            const isSelected = idx === activeTab;
+            const SIcon = section.icon;
+            const isSelected = activeTab === idx;
+
             return (
               <button
                 key={section.id}
                 onClick={() => setActiveTab(idx)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium shrink-0 apple-spring cursor-pointer flex items-center gap-1.5 ${
+                className={`flex items-center justify-between p-2.5 rounded-2xl text-left apple-spring cursor-pointer transition-all shrink-0 md:shrink ${
                   isSelected
-                    ? "bg-blue-600 text-white shadow-sm shadow-blue-500/20"
-                    : "glass-subtle text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "glass-subtle text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 }`}
               >
-                <span>{section.title.split(". ")[1]}</span>
+                <div className="flex items-center gap-2.5">
+                  <SIcon
+                    className={`h-4 w-4 shrink-0 ${
+                      isSelected ? "text-white" : "text-blue-500"
+                    }`}
+                  />
+                  <span className="text-xs font-bold truncate">
+                    {section.title.split(". ")[1]}
+                  </span>
+                </div>
+                <ChevronRight
+                  className={`h-3 w-3 shrink-0 hidden md:block ${
+                    isSelected ? "text-white" : "text-zinc-400"
+                  }`}
+                />
               </button>
             );
           })}
         </div>
 
-        {/* Active Section Content Card */}
-        <div className="p-5 rounded-2xl glass-subtle border border-zinc-200/50 dark:border-zinc-800/60 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                <Icon className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                  {currentSection.title}
-                </h4>
-                <p className="text-[11px] text-zinc-400">
-                  {currentSection.subtitle}
-                </p>
-              </div>
+        {/* Right: Active Section Content */}
+        <div className="flex-1 space-y-4 rounded-3xl glass-subtle p-5 border border-zinc-200 dark:border-zinc-800">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                <Icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                {currentSection.title}
+              </h3>
+              <Badge variant={currentSection.badgeColor} size="sm">
+                Passo a Passo
+              </Badge>
             </div>
-            <Badge variant={currentSection.badgeColor} size="sm">
-              Passo a Passo
-            </Badge>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {currentSection.subtitle}
+            </p>
           </div>
 
-          {/* Steps List */}
           <div className="space-y-3 pt-1">
-            {currentSection.steps.map((st, i) => (
+            {currentSection.steps.map((step, idx) => (
               <div
-                key={i}
-                className="flex items-start gap-3 p-3 rounded-xl bg-white/60 dark:bg-zinc-800/40 border border-zinc-200/40 dark:border-zinc-700/40 text-xs"
+                key={idx}
+                className="p-3.5 rounded-2xl bg-white/80 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-1 shadow-2xs"
               >
-                <div className="h-5 w-5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 font-bold text-[10px]">
-                  {i + 1}
+                <div className="flex items-center gap-2">
+                  <span className="h-5 w-5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center justify-center shrink-0">
+                    {idx + 1}
+                  </span>
+                  <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    {step.title}
+                  </h4>
                 </div>
-                <div>
-                  <strong className="text-zinc-900 dark:text-zinc-100 block mb-0.5">
-                    {st.title}
-                  </strong>
-                  <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed text-[11px]">
-                    {st.desc}
-                  </p>
-                </div>
+                <p className="text-[11px] text-zinc-600 dark:text-zinc-300 pl-7 leading-relaxed font-medium">
+                  {step.desc}
+                </p>
               </div>
             ))}
           </div>
 
-          {/* Action button to test directly */}
-          <div className="pt-2 flex items-center justify-between">
-            <span className="text-[11px] text-zinc-400">
-              Passo {activeTab + 1} de {GUIDE_SECTIONS.length}
+          <div className="pt-2 flex justify-between items-center">
+            <span className="text-[10px] text-zinc-400 font-semibold">
+              {activeTab + 1} de {GUIDE_SECTIONS.length}
             </span>
 
-            <div className="flex items-center gap-2">
-              <Link href={currentSection.actionLink} onClick={onClose}>
-                <AppleButton variant="primary" size="sm">
-                  <span>{currentSection.actionText}</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </AppleButton>
-              </Link>
-
-              {activeTab < GUIDE_SECTIONS.length - 1 ? (
-                <AppleButton
-                  variant="glass"
-                  size="sm"
-                  onClick={() => setActiveTab(activeTab + 1)}
-                >
-                  <span>Próximo</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </AppleButton>
-              ) : (
-                <AppleButton variant="glass" size="sm" onClick={onClose}>
-                  <span>Concluir</span>
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                </AppleButton>
-              )}
-            </div>
+            <Link href={currentSection.actionLink} onClick={onClose}>
+              <AppleButton variant="primary" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                <span>{currentSection.actionText}</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </AppleButton>
+            </Link>
           </div>
-        </div>
-
-        {/* Tip Box */}
-        <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs flex items-center gap-2">
-          <Lightbulb className="h-4 w-4 shrink-0" />
-          <span>
-            <strong>Dica Rápida:</strong> Você também pode acessar a página completa do <strong>Guia & Central de Ajuda</strong> no menu lateral a qualquer momento!
-          </span>
         </div>
       </div>
     </AppleModal>

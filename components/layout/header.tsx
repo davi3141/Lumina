@@ -9,6 +9,7 @@ import {
   Sparkles,
   Check,
   HelpCircle,
+  Bot,
 } from "lucide-react";
 import { AppleButton } from "@/components/ui/apple-button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -17,6 +18,7 @@ import { InteractiveGuideModal } from "@/components/guide/interactive-guide-moda
 import { Room } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/lib/user-context";
+import Link from "next/link";
 
 interface HeaderProps {
   onToggleMobileMenu: () => void;
@@ -37,7 +39,7 @@ export function Header({
 
   return (
     <>
-      <header className="sticky top-0 z-30 h-16 glass-panel border-b border-zinc-200/50 dark:border-zinc-800/60 px-4 sm:px-6 flex items-center justify-between">
+      <header className="sticky top-0 z-30 h-16 glass-panel border-b border-zinc-300 dark:border-zinc-800 px-4 sm:px-6 flex items-center justify-between">
         {/* Left: Mobile Toggle & Room Selector */}
         <div className="flex items-center gap-3">
           <AppleButton
@@ -54,18 +56,18 @@ export function Header({
           <div className="relative">
             <button
               onClick={() => setRoomDropdownOpen(!roomDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-2xl glass-subtle hover:bg-white/80 dark:hover:bg-white/10 apple-spring cursor-pointer text-left"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-2xl glass-subtle border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 apple-spring cursor-pointer text-left"
             >
               <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
               <div className="hidden sm:block">
-                <span className="text-xs text-zinc-400 block font-normal leading-tight">
-                  Sala Ativa
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block font-normal leading-tight">
+                  Sala Selecionada
                 </span>
-                <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate max-w-[180px] block">
+                <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[180px] block">
                   {selectedRoom.name}
                 </span>
               </div>
-              <span className="sm:hidden text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate max-w-[120px]">
+              <span className="sm:hidden text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[120px]">
                 {selectedRoom.name}
               </span>
               <ChevronDown className="h-3.5 w-3.5 text-zinc-400 ml-1" />
@@ -77,8 +79,8 @@ export function Header({
                   className="fixed inset-0 z-40"
                   onClick={() => setRoomDropdownOpen(false)}
                 />
-                <div className="absolute left-0 mt-2 w-72 glass-dropdown rounded-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider px-3 py-1.5">
+                <div className="absolute left-0 mt-2 w-72 glass-dropdown rounded-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150 border border-zinc-300 dark:border-zinc-700">
+                  <p className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider px-3 py-1.5">
                     Minhas Salas de Aula
                   </p>
                   <div className="space-y-1">
@@ -92,7 +94,7 @@ export function Header({
                         className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 apple-spring text-left cursor-pointer"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                          <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
                             {room.name}
                           </p>
                           <span className="text-[10px] text-zinc-600 dark:text-zinc-400">
@@ -113,6 +115,15 @@ export function Header({
 
         {/* Right: Actions, Theme, Notifications, Avatar */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Lumi IA Link */}
+          <Link
+            href="/lumi"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs font-semibold apple-spring transition-all"
+          >
+            <Bot className="h-3.5 w-3.5 text-amber-500" />
+            <span>Lumi IA</span>
+          </Link>
+
           {/* Guide Quick Button */}
           <AppleButton
             variant="glass"
@@ -145,7 +156,7 @@ export function Header({
               className="relative"
               aria-label="Notificações"
             >
-              <Bell className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
+              <Bell className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
               <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-zinc-900" />
             </AppleButton>
 
@@ -155,10 +166,10 @@ export function Header({
                   className="fixed inset-0 z-40"
                   onClick={() => setNotificationsOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-80 glass-dropdown rounded-3xl p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200/50 dark:border-zinc-800/60">
-                    <h4 className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                      Notificações do Sistema
+                <div className="absolute right-0 mt-2 w-80 glass-dropdown rounded-3xl p-4 z-50 animate-in fade-in zoom-in-95 duration-150 border border-zinc-300 dark:border-zinc-700">
+                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-200 dark:border-zinc-800">
+                    <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                      Notificações do Mural
                     </h4>
                     <span className="text-[10px] text-blue-500 font-medium cursor-pointer">
                       Marcar lidas
@@ -166,19 +177,19 @@ export function Header({
                   </div>
                   <div className="space-y-2 text-xs">
                     <div className="p-2.5 rounded-2xl bg-blue-500/10 border border-blue-500/20">
-                      <p className="font-medium text-blue-600 dark:text-blue-400">
+                      <p className="font-bold text-blue-600 dark:text-blue-400">
                         ⏰ Prazo Iminente
                       </p>
-                      <p className="text-[11px] text-zinc-600 dark:text-zinc-300 mt-0.5">
-                        Apresentação no Canva vence em 48 horas.
+                      <p className="text-[11px] text-zinc-700 dark:text-zinc-300 mt-0.5">
+                        Entrega do Trabalho Bimestral vence em breve.
                       </p>
                     </div>
-                    <div className="p-2.5 rounded-2xl glass-subtle">
-                      <p className="font-medium text-zinc-800 dark:text-zinc-200">
-                        🎉 Novo Material no Feed
+                    <div className="p-2.5 rounded-2xl glass-subtle border border-zinc-200 dark:border-zinc-800">
+                      <p className="font-bold text-zinc-800 dark:text-zinc-200">
+                        💬 Nova Mensagem no Chat
                       </p>
-                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                        Helena Duarte publicou o resumo de Clean Architecture.
+                      <p className="text-[11px] text-zinc-600 dark:text-zinc-400 mt-0.5">
+                        Mariana Costa enviou uma mensagem na sua turma.
                       </p>
                     </div>
                   </div>
@@ -193,20 +204,20 @@ export function Header({
           {/* User mini status */}
           <div
             onClick={() => setShowLoginModal(true)}
-            className="hidden lg:flex items-center gap-2 pl-2 border-l border-zinc-300 dark:border-zinc-800 cursor-pointer"
-            title="Clique para trocar de conta ou nome"
+            className="flex items-center gap-2 pl-2 border-l border-zinc-300 dark:border-zinc-800 cursor-pointer"
+            title="Clique para editar seu perfil ou trocar de avatar animal"
           >
             <img
               src={user.avatar_url}
               alt={user.display_name}
-              className="h-7 w-7 rounded-full object-cover ring-1 ring-blue-500"
+              className="h-8 w-8 rounded-xl object-cover ring-2 ring-blue-500/30 shadow-xs"
             />
-            <div className="text-left">
-              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block leading-tight">
+            <div className="text-left hidden lg:block">
+              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block leading-tight truncate max-w-[110px]">
                 {user.display_name}
               </span>
               <Badge variant={user.role_color} size="sm">
-                <Sparkles className="h-2.5 w-2.5" />
+                <Sparkles className="h-2 w-2" />
                 {user.custom_role}
               </Badge>
             </div>

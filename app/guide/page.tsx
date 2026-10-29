@@ -12,16 +12,13 @@ import {
   FileText,
   MessageSquare,
   Sparkles,
-  Palette,
+  Bot,
   User,
   Search,
-  ExternalLink,
   ChevronDown,
-  PlayCircle,
-  Lightbulb,
-  Check,
-  Mail,
-  Zap,
+  Lock,
+  Crown,
+  Shield,
 } from "lucide-react";
 
 interface FeatureGuide {
@@ -39,175 +36,136 @@ const FEATURE_GUIDES: FeatureGuide[] = [
   {
     id: "tasks",
     name: "Mural de Atividades & Prazos",
-    category: "Produtividade",
+    category: "Prazos",
     icon: CheckSquare,
-    summary: "Como acompanhar entregas da turma, alternar status de tarefas, anexar links de slides do Canva e notificar colegas via e-mail.",
+    summary: "Como acompanhar entregas da turma, alternar status de tarefas, e como administradores cadastram e editam prazos.",
     route: "/tasks",
     steps: [
       {
-        title: "1. Como marcar uma tarefa como feita ou em andamento",
-        explanation: "Na lista de tarefas, clique no quadrado de seleção à esquerda. Clicando uma vez, ela passa para 'Em Andamento' com um ponto azul pulsante. Clicando novamente, ela é marcada como 'Concluída' com um visto verde e fica riscada.",
+        title: "1. Como marcar uma entrega como concluída",
+        explanation: "Na lista de tarefas, clique no quadrado de seleção à esquerda. Clicando uma vez, ela passa para 'Em Andamento'. Clicando novamente, ela é marcada como 'Concluída' com um visto verde e fica riscada.",
       },
       {
-        title: "2. Como cadastrar um novo prazo oficial",
-        explanation: "Clique no botão azul '+ Novo Prazo'. Preencha o título da entrega, a disciplina (ex: Engenharia, Cálculo), a data e hora limite no calendário, o nível de prioridade (Média, Alta ou Urgente) e opcionalmente cole o link do Canva.",
+        title: "2. Quem pode adicionar e editar prazos?",
+        explanation: "Apenas o Administrador da sala tem o botão de 'Adicionar Prazo (Admin)', 'Editar' (ícone de lápis) e 'Excluir' (ícone de lixeira). Membros comuns só visualizam e concluem suas partes.",
       },
       {
         title: "3. Como disparar alerta de e-mail para a turma (Resend)",
         explanation: "Ao lado de cada tarefa existe o botão com ícone de envelope ('Avisar Turma'). Clicando nele, o sistema aciona a rota gratuita do Resend que envia um e-mail formatado alertando sobre o prazo próximo.",
       },
-      {
-        title: "4. Como abrir os slides vinculados à tarefa",
-        explanation: "Se a atividade tiver uma apresentação associada, você verá um botão roxo 'Canva'. Ao clicar, ele abre diretamente o design para você começar a editar.",
-      },
     ],
-    proTip: "Use o filtro do topo ('Todas', 'Pendentes', 'Em Andamento', 'Concluídas') para focar apenas nas prioridades da semana.",
+    proTip: "Use os filtros ('Todas', 'Pendentes', 'Em Andamento', 'Concluídas') para focar no que precisa ser entregue primeiro.",
   },
   {
     id: "rooms",
-    name: "Salas de Aula Privadas & Entrada por Código",
+    name: "Salas de Aula Privadas & Permissões de Admin",
     category: "Salas",
     icon: DoorOpen,
-    summary: "Como ingressar em turmas de amigos com código único, criar salas e usar o painel administrativo de moderação.",
+    summary: "Apenas quem cria a sala vira Admin. O criador pode promover outros membros, gerenciar o código de convite e banir quem atrapalhar.",
     route: "/rooms",
     steps: [
       {
         title: "1. Como entrar em uma sala usando o código",
-        explanation: "Clique no botão 'Entrar por Código' (ou 'Código de Sala' no topo). Digite o código de 10 a 12 caracteres (ex: LUMINA-7821 ou APPLE-4092) e confirme. O acesso é liberado instantaneamente.",
+        explanation: "Clique no botão 'Entrar por Código' (ou 'Código de Sala' no topo). Digite o código de convite (ex: TURMA-2026) e confirme. O acesso é liberado instantaneamente como membro comum.",
       },
       {
-        title: "2. Como criar a sua própria sala privada",
-        explanation: "Clique em '+ Criar Nova Sala'. Dê um nome para a turma, matéria e descrição. O sistema gera automaticamente um código único que só você e os convidados conhecem.",
+        title: "2. Como criar a sua própria sala e ser Admin",
+        explanation: "Clique em '+ Criar Nova Sala'. Dê um nome para a turma, matéria e descrição. Você se torna o criador e Administrador exclusivo desta sala.",
       },
       {
-        title: "3. Como expulsar ou banir usuários indisciplinados",
-        explanation: "No cartão da sua sala, clique no ícone de engrenagem (Settings) para abrir o Painel Administrativo. Na aba 'Membros', você verá a lista de alunos e poderá clicar em 'Banir' ou na lixeira para remover o membro.",
-      },
-      {
-        title: "4. Como fixar um aviso urgente no mural",
-        explanation: "No mesmo Painel Administrativo, vá na aba 'Fixar Aviso', digite o título e a instrução. Esse aviso aparecerá em destaque dourado com pin no topo do Dashboard de todos os membros.",
+        title: "3. Como promover colegas para Admin ou Moderador",
+        explanation: "Abra a sala e clique no botão 'Painel do Admin 👑'. Na lista de participantes, você pode alterar o cargo de qualquer aluno para 'Administrador', 'Moderador' ou 'Membro Comum'.",
       },
     ],
-    proTip: "Você pode clicar no código da sala a qualquer momento para copiá-lo para a sua área de transferência e mandar no WhatsApp da turma.",
-  },
-  {
-    id: "notes",
-    name: "Caderno Pessoal (Estilo Notion)",
-    category: "Notas",
-    icon: FileText,
-    summary: "Seu bloco de notas particular e flexível para organizar resumos, fórmulas e checklists por aula.",
-    route: "/notes",
-    steps: [
-      {
-        title: "1. Como criar e organizar páginas",
-        explanation: "Clique no botão '+ Nova Nota' no painel lateral esquerdo do caderno. Uma nova página sem título será criada e você pode digitar qualquer título no campo principal.",
-      },
-      {
-        title: "2. Como mudar o ícone de capa (Emoji)",
-        explanation: "Na barra superior do editor, clique em um dos emojis (🍎, 📝, ⚡, 💡, 📐, 🔬). Ele será aplicado instantaneamente na lista lateral.",
-      },
-      {
-        title: "3. Como escrever e formatar anotações",
-        explanation: "O editor aceita markdown e texto livre. Você pode fazer listas de tarefas com '- [ ]', títulos com '#' e tópicos com traços.",
-      },
-      {
-        title: "4. Como buscar notas rapidamente",
-        explanation: "Use a barra 'Buscar em todas as notas...' para filtrar instantaneamente mesmo se você tiver dezenas de matérias salvas.",
-      },
-    ],
-    proTip: "Suas notas são 100% privadas graças às políticas de segurança do Supabase RLS. Nem mesmo os outros administradores da sala podem ler suas anotações pessoais.",
+    proTip: "Você pode clicar no código da sala a qualquer momento para copiá-lo e compartilhar com a sua turma.",
   },
   {
     id: "chat",
-    name: "Chat em Tempo Real da Turma",
-    category: "Comunicação",
+    name: "Chat da Turma & Chat PV (Privado 1-a-1)",
+    category: "Chat & PV",
     icon: MessageSquare,
-    summary: "Tire dúvidas ao vivo, envie links do Canva e converse com colegas identificados por cargos oficiais.",
+    summary: "Converse com todos na sala ou mande mensagens privadas diretamente no PV de qualquer colega de classe.",
     route: "/chat",
     steps: [
       {
-        title: "1. Como enviar mensagens",
-        explanation: "Digite sua dúvida ou comentário no campo 'Tire uma dúvida com a turma...' e pressione Enter ou clique na setinha de envio.",
+        title: "1. Chat da Turma (Geral)",
+        explanation: "Na aba '💬 Turma (Geral)', todas as mensagens enviadas ficam visíveis para todos os membros que estão na sala.",
       },
       {
-        title: "2. Como anexar uma apresentação do Canva",
-        explanation: "Clique no botão com a paletinha de cores (🎨) ao lado do campo de digitação. Cole o link da sua apresentação ou cartaz e envie. A mensagem incluirá um botão estilizado 'Canva: Abrir Apresentação'.",
+        title: "2. Chat PV (Mensagens Particulares)",
+        explanation: "Na aba '🔒 Mensagens Privadas (PV)', você vê a lista dos seus colegas de turma. Clique em um deles para abrir o bate-papo privado 1-a-1.",
       },
       {
-        title: "3. Como identificar monitores e professores",
-        explanation: "Ao lado do nome de cada aluno no chat aparece um selo colorido oficial (ex: Administrador em roxo, Moderador em verde, Aluno Destaque em azul).",
+        title: "3. Iniciar PV direto do chat público ou da lista de membros",
+        explanation: "Ao lado de qualquer mensagem ou membro, basta clicar em 'Conversar no PV' para ir direto para a conversa particular com ele.",
       },
     ],
-    proTip: "O chat utiliza o motor Supabase Realtime via WebSockets, portanto as mensagens aparecem instantaneamente sem necessidade de recarregar a página.",
+    proTip: "O Chat PV é perfeito para tirar dúvidas de exercícios sem poluir o canal geral da matéria.",
   },
   {
-    id: "summaries",
-    name: "Feed de Resumos & Materiais (Knowunity)",
-    category: "Estudos",
-    icon: Sparkles,
-    summary: "Espaço colaborativo para publicação, curtidas e download de materiais de estudo da comunidade acadêmica.",
-    route: "/summaries",
+    id: "lumi",
+    name: "Lumi IA (Assistente de Estudos Amigável)",
+    category: "Lumi IA",
+    icon: Bot,
+    summary: "Uma inteligência artificial super amigável que explica qualquer conteúdo de forma simples, mastigada e sem enrolação.",
+    route: "/lumi",
     steps: [
       {
-        title: "1. Como visualizar e estudar um resumo",
-        explanation: "Clique no botão 'Estudar' em qualquer cartão. Um modal translúcido estilo Apple abrirá mostrando o resumo completo, mapa mental ou até a apresentação embutida do Canva em tamanho expandido.",
+        title: "1. Como fazer perguntas para a Lumi",
+        explanation: "Digite qualquer dúvida na barra de conversa. Pode ser um conceito difícil de biologia, uma fórmula de matemática, ou como organizar uma semana de provas.",
       },
       {
-        title: "2. Como curtir um material que te ajudou",
-        explanation: "Clique no ícone de coração no canto inferior esquerdo do cartão. O coração ficará preenchido de vermelho e a contagem de curtidas subirá na hora.",
+        title: "2. Botões de atalho rápido",
+        explanation: "Use botões como 'Explique Simples', 'Resumir Conteúdo' ou 'Organizar Tempo' para obter respostas práticas com um clique.",
       },
       {
-        title: "3. Como publicar seu próprio resumo",
-        explanation: "Clique em '+ Publicar Resumo', digite o título, disciplina, síntese explicativa e, se tiver, o link do Canva Embed. O material fica disponível na hora para a sala toda.",
+        title: "3. Perfeita no Celular",
+        explanation: "No smartphone, a Lumi fica disponível diretamente na barra inferior com ícone iluminado de fácil acesso.",
       },
     ],
-    proTip: "Filtre por matéria clicando nas pílulas do topo ('Engenharia', 'Design', 'Segurança') para encontrar exatamente a revisão que você precisa para a prova.",
+    proTip: "A Lumi foi feita para falar de forma natural e acolhedora, como um amigo te explicando a matéria.",
   },
   {
-    id: "canva",
-    name: "Central de Integração Canva",
-    category: "Design",
-    icon: Palette,
-    summary: "Apresentações 16:9 embutidas, templates acadêmicos e importador de qualquer design externo.",
-    route: "/canva",
-    steps: [
-      {
-        title: "1. Como navegar na apresentação interativa",
-        explanation: "Dentro do quadro da Central Canva, você pode clicar nos botões de avançar e retroceder slides diretamente no navegador, sem precisar instalar nada.",
-      },
-      {
-        title: "2. Como criar novos designs rapidamente",
-        explanation: "No topo da página existem 3 atalhos: 'Criar Apresentação' (abre o Canva em 16:9), 'Criar Cartaz & Resumo' (abre em folha A4) e 'Mapa Mental Interativo' (abre o criador de diagramas).",
-      },
-      {
-        title: "3. Como importar qualquer slide seu do Canva",
-        explanation: "No Canva, clique em Compartilhar > Mais > Incorporar (Embed) e copie o link. Cole no campo 'Cole aqui o link do seu design' e clique em 'Visualizar Embed'. O site mostrará a sua apresentação na mesma hora!",
-      },
-    ],
-    proTip: "Use o botão 'Copiar Link' para compartilhar o slide master diretamente com os colegas do seu grupo de trabalho.",
-  },
-  {
-    id: "profile",
-    name: "Perfil & Cargos Personalizados",
-    category: "Conta",
+    id: "avatars",
+    name: "Catálogo de 40 Animais (Fundos de Cor Sólida)",
+    category: "Avatares",
     icon: User,
-    summary: "Como personalizar seu nome de exibição, foto de perfil, biografia e distintivo de cargo visível.",
+    summary: "100% livre de fotos humanas: 40 avatares de bichinhos lindos com cores sólidas de alto contraste.",
     route: "/profile",
     steps: [
       {
-        title: "1. Como escolher seu cargo visível",
-        explanation: "Na seção 'Escolha seu Cargo Personalizado', clique em um dos cartões: Administrador (roxo), Moderador (verde), Aluno Destaque (azul), Monitor Acadêmico (laranja) ou Pesquisador (rosa).",
+        title: "1. Como escolher seu bichinho favorito",
+        explanation: "Vá em 'Meu Perfil' ou clique no seu avatar no cabeçalho. Você verá o catálogo completo com 40 animais (Gatinho, Panda, Raposa, Coruja, etc.).",
       },
       {
-        title: "2. Como escolher seu avatar",
-        explanation: "Clique em uma das fotos redondas de atalho ou cole o link de qualquer imagem da internet no campo 'URL da Imagem de Avatar'.",
+        title: "2. Busca rápida de animais",
+        explanation: "Digite o nome do animal no campo de busca para encontrar seu favorito em segundos.",
       },
       {
-        title: "3. Salvar alterações",
-        explanation: "Clique no botão azul 'Salvar Alterações'. Suas mensagens no chat e seus resumos no feed passarão a exibir o seu novo selo e avatar.",
+        title: "3. Fundo de cor sólida limpa",
+        explanation: "Cada avatar tem um fundo liso e limpo que combina perfeitamente com os modos claro e escuro.",
       },
     ],
-    proTip: "Seus distintivos de cargo aparecem em toda a plataforma para destacar seu papel de liderança ou dedicação nos estudos.",
+    proTip: "Seu avatar de animal acompanha seu nome no mural, no chat da sala e no PV.",
+  },
+  {
+    id: "notes",
+    name: "Caderno Pessoal (Bloco de Notas)",
+    category: "Caderno",
+    icon: FileText,
+    summary: "Seu bloco de notas particular para registrar resumos, cronogramas e anotações que só você tem acesso.",
+    route: "/notes",
+    steps: [
+      {
+        title: "1. Como criar e editar notas",
+        explanation: "Clique em '+ Nova Nota'. Digite suas anotações, use listas de tarefas com traços e personalize o emoji de capa.",
+      },
+      {
+        title: "2. Privacidade garantida",
+        explanation: "O caderno é particular do seu usuário. Nenhum colega de sala consegue ver o que você escreve nele.",
+      },
+    ],
+    proTip: "Deixe um checklist de matérias da semana no seu caderno para nunca se perder nas revisões.",
   },
 ];
 
@@ -216,7 +174,7 @@ export default function GuidePage() {
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [expandedId, setExpandedId] = useState<string | null>("tasks");
 
-  const categories = ["Todas", "Produtividade", "Salas", "Notas", "Comunicação", "Estudos", "Design", "Conta"];
+  const categories = ["Todas", "Prazos", "Salas", "Chat & PV", "Lumi IA", "Avatares", "Caderno"];
 
   const filteredGuides = FEATURE_GUIDES.filter((guide) => {
     const matchesCategory =
@@ -236,7 +194,7 @@ export default function GuidePage() {
     <AppShell>
       <div className="space-y-8">
         {/* Apple-style Hero Header */}
-        <section className="relative overflow-hidden rounded-3xl glass-panel p-6 sm:p-8 border shadow-sm">
+        <section className="relative overflow-hidden rounded-3xl glass-panel p-6 sm:p-8 border border-zinc-300 dark:border-zinc-800 shadow-sm">
           <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-transparent blur-3xl pointer-events-none" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
@@ -244,51 +202,50 @@ export default function GuidePage() {
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="blue" size="md">
                   <HelpCircle className="h-3.5 w-3.5" />
-                  Manual Interativo do Usuário
+                  Manual Interativo
                 </Badge>
-                <span className="text-xs text-zinc-400">Guia Completo para Iniciantes</span>
+                <span className="text-xs text-zinc-500">Guia Fácil do Usuário</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-                Como Usar Todas as Tarefas e Recursos da Lumina
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+                Como Usar Todas as Funções do Lumina
               </h1>
-              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 max-w-2xl mt-1.5 leading-relaxed">
-                Aprenda o passo a passo detalhado de cada ferramenta: do mural de prazos e caderno Notion à integração com o Canva e moderação de salas.
+              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-xl mt-1 leading-relaxed">
+                Tudo explicado de forma simples: permissões de administrador, mural de prazos, chat particular (PV), Lumi IA e os avatares de animais.
               </p>
             </div>
 
-            <div className="shrink-0 flex items-center gap-2">
-              <Link href="/tasks">
-                <AppleButton variant="primary" size="md">
-                  <span>Praticar nas Tarefas</span>
-                  <ExternalLink className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-3">
+              <Link href="/">
+                <AppleButton variant="primary" size="md" className="bg-blue-600 hover:bg-blue-700 text-white">
+                  Voltar ao Início
                 </AppleButton>
               </Link>
             </div>
           </div>
         </section>
 
-        {/* Search & Category Filter Pills */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
+        {/* Search & Category Filter */}
+        <div className="space-y-4">
+          <div className="relative max-w-md">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Pesquisar como fazer qualquer coisa (ex: prazos, canva, banir, emoji)..."
-              className="w-full pl-9 pr-4 py-2.5 text-xs rounded-2xl glass-subtle border text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="Pesquisar por funcionalidade ou dúvida..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs sm:text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
           </div>
 
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium apple-spring cursor-pointer shrink-0 ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all ${
                   selectedCategory === cat
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "glass-subtle text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                    ? "bg-blue-600 text-white shadow-xs"
+                    : "glass-subtle text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 border border-zinc-200 dark:border-zinc-800"
                 }`}
               >
                 {cat}
@@ -297,99 +254,75 @@ export default function GuidePage() {
           </div>
         </div>
 
-        {/* Interactive Features Accordion List */}
+        {/* Features Accordion List */}
         <div className="space-y-4">
           {filteredGuides.map((guide) => {
-            const Icon = guide.icon;
+            const GIcon = guide.icon;
             const isExpanded = expandedId === guide.id;
 
             return (
               <div
                 key={guide.id}
-                className="rounded-3xl glass-panel border overflow-hidden apple-spring transition-all"
+                className="rounded-3xl glass-panel border border-zinc-300 dark:border-zinc-800 overflow-hidden shadow-xs transition-all"
               >
-                {/* Header row clickable */}
                 <div
                   onClick={() => setExpandedId(isExpanded ? null : guide.id)}
-                  className="p-5 sm:p-6 flex items-start sm:items-center justify-between gap-4 cursor-pointer hover:bg-white/40 dark:hover:bg-white/5 apple-spring"
+                  className="p-5 sm:p-6 flex items-start justify-between gap-4 cursor-pointer hover:bg-zinc-100/50 dark:hover:bg-zinc-800/50 apple-spring"
                 >
-                  <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                    <div className="h-11 w-11 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                      <Icon className="h-5 w-5" />
+                  <div className="flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20">
+                      <GIcon className="h-5 w-5" />
                     </div>
-                    <div className="min-w-0">
+                    <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                        <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                           {guide.name}
                         </h3>
-                        <Badge variant="zinc" size="sm">
+                        <Badge variant="blue" size="sm">
                           {guide.category}
                         </Badge>
                       </div>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-1">
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 leading-relaxed">
                         {guide.summary}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <Link
-                      href={guide.route}
-                      onClick={(e) => e.stopPropagation()}
-                      className="hidden sm:inline-flex"
-                    >
-                      <AppleButton variant="glass" size="sm">
-                        <span>Acessar</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </AppleButton>
-                    </Link>
-
-                    <button
-                      className={`p-2 rounded-full glass-subtle text-zinc-400 apple-spring ${
+                  <div className="flex items-center gap-2 shrink-0 pt-1">
+                    <ChevronDown
+                      className={`h-5 w-5 text-zinc-400 transition-transform duration-200 ${
                         isExpanded ? "rotate-180 text-blue-500" : ""
                       }`}
-                      aria-label="Expandir ou recolher guia"
-                    >
-                      <ChevronDown className="h-4 w-4" />
-                    </button>
+                    />
                   </div>
                 </div>
 
-                {/* Expanded Detailed Step by Step */}
                 {isExpanded && (
-                  <div className="px-5 sm:px-6 pb-6 pt-2 border-t border-zinc-200/50 dark:border-zinc-800/60 space-y-4 animate-in fade-in duration-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-2">
-                      {guide.steps.map((st, i) => (
+                  <div className="px-5 sm:px-6 pb-6 pt-2 border-t border-zinc-200 dark:border-zinc-800/60 space-y-4 animate-in fade-in duration-200">
+                    <div className="space-y-3">
+                      {guide.steps.map((step, idx) => (
                         <div
-                          key={i}
-                          className="p-4 rounded-2xl glass-subtle border border-zinc-200/40 dark:border-zinc-800/60 text-xs space-y-1.5"
+                          key={idx}
+                          className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 space-y-1"
                         >
-                          <div className="flex items-center gap-2 font-semibold text-zinc-900 dark:text-zinc-100">
-                            <span className="h-5 w-5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center text-[10px] font-bold">
-                              {i + 1}
-                            </span>
-                            <span>{st.title}</span>
-                          </div>
-                          <p className="text-zinc-600 dark:text-zinc-300 leading-relaxed text-[11px] pl-7">
-                            {st.explanation}
+                          <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                            {step.title}
+                          </h4>
+                          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
+                            {step.explanation}
                           </p>
                         </div>
                       ))}
                     </div>
 
-                    {/* Pro Tip Box */}
-                    <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-xs flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
-                        <Lightbulb className="h-4 w-4 shrink-0 text-blue-500" />
-                        <span>
-                          <strong>Dica Pro:</strong> {guide.proTip}
-                        </span>
-                      </div>
+                    <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 leading-relaxed">
+                      💡 <strong>Dica Pro:</strong> {guide.proTip}
+                    </div>
 
+                    <div className="flex justify-end pt-1">
                       <Link href={guide.route}>
-                        <AppleButton variant="primary" size="sm" className="shrink-0">
-                          <span>Experimentar agora</span>
-                          <ExternalLink className="h-3 w-3" />
+                        <AppleButton variant="primary" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+                          <span>Acessar {guide.name}</span>
                         </AppleButton>
                       </Link>
                     </div>
