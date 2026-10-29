@@ -1,11 +1,13 @@
 import RoomDetailClient from "./room-detail-client";
 
+export const dynamicParams = true;
+
 export function generateStaticParams() {
   return [
+    { id: "sala-marketing" },
+    { id: "sala-administracao" },
+    { id: "sala-software" },
     { id: "sala-principal" },
-    { id: "room-alpha" },
-    { id: "room-beta" },
-    { id: "room-gamma" },
   ];
 }
 

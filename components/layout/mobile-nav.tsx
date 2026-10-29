@@ -3,15 +3,17 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, DoorOpen, CheckSquare, MessageSquare, Bot } from "lucide-react";
+import { LayoutDashboard, DoorOpen, FileText, Bot, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Navegação Externa Mobile: Focada em coisas pessoais e salas
+// (Mural de Prazos, Chat e Membros ficam DENTRO da sala que você abrir!)
 const MOBILE_TABS = [
   { name: "Início", href: "/", icon: LayoutDashboard },
   { name: "Salas", href: "/rooms", icon: DoorOpen },
-  { name: "Prazos", href: "/tasks", icon: CheckSquare },
-  { name: "Chat & PV", href: "/chat", icon: MessageSquare },
+  { name: "Caderno", href: "/notes", icon: FileText },
   { name: "Lumi IA", href: "/lumi", icon: Bot, highlight: true },
+  { name: "Perfil", href: "/profile", icon: User },
 ];
 
 export function MobileNav() {

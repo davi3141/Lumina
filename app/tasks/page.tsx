@@ -13,28 +13,34 @@ import {
   Edit2,
   Trash2,
   Shield,
-  ShieldAlert,
-  AlertCircle,
-  FileText,
+  Crown,
+  DoorOpen,
+  ArrowRight,
+  Filter,
 } from "lucide-react";
 import { AppleButton } from "@/components/ui/apple-button";
 import { Badge } from "@/components/ui/badge";
 import { AppleModal } from "@/components/ui/apple-modal";
 import { cn, formatDate } from "@/lib/utils";
 import { useUser } from "@/lib/user-context";
+import Link from "next/link";
 
 export default function TasksPage() {
   const {
     tasks,
+    rooms,
     createTask,
     updateTask,
     deleteTask,
     toggleTaskStatus,
     selectedRoom,
+    setSelectedRoom,
     isRoomAdmin,
     user,
   } = useUser();
 
+  // Permite selecionar qual sala visualizar no mural
+  const [activeRoomId, setActiveRoomId] = useState<string>(selectedRoom?.id || rooms[0]?.id || "sala-marketing");
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "in_progress" | "completed">("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -50,16 +56,19 @@ export default function TasksPage() {
   const [formPriority, setFormPriority] = useState<Task["priority"]>("medium");
   const [formDescription, setFormDescription] = useState("");
 
-  const currentRoomId = selectedRoom?.id || "sala-principal";
-  const isAdmin = isRoomAdmin(currentRoomId);
+  const currentRoom = rooms.find((r) => r.id === activeRoomId) || selectedRoom || rooms[0];
+  const isAdmin = isRoomAdmin(currentRoom?.id || "");
+
+  // REGRA DE OURO: Isola estritamente as tarefas da sala ativa
+  const roomTasks = tasks.filter((t) => t.room_id === currentRoom?.id);
 
   const handleOpenCreate = () => {
     if (!isAdmin) {
-      alert("Apenas o Administrador desta sala tem permissão para adicionar prazos oficiais no mural.");
+      alert("Apenas o Administrador desta sala tem permissão para cadastrar prazos oficiais no mural.");
       return;
     }
     setFormTitle("");
-    setFormSubject(selectedRoom?.subject || "Geral");
+    setFormSubject(currentRoom?.subject || "Geral");
     setFormDueDate(new Date(Date.now() + 86400000 * 3).toISOString().slice(0, 16));
     setFormPriority("medium");
     setFormDescription("");
@@ -86,11 +95,11 @@ export default function TasksPage() {
 
     createTask(
       formTitle.trim(),
-      formSubject.trim() || selectedRoom?.subject || "Geral",
+      formSubject.trim() || currentRoom?.subject || "Geral",
       formDueDate || new Date(Date.now() + 86400000 * 3).toISOString(),
       formPriority,
       formDescription.trim() || undefined,
-      currentRoomId
+      currentRoom?.id || "sala-marketing"
     );
 
     setIsCreateModalOpen(false);
@@ -102,7 +111,7 @@ export default function TasksPage() {
 
     updateTask(editingTask.id, {
       title: formTitle.trim(),
-      subject: formSubject.trim() || selectedRoom?.subject || "Geral",
+      subject: formSubject.trim() || currentRoom?.subject || "Geral",
       due_date: formDueDate || editingTask.due_date,
       priority: formPriority,
       description: formDescription.trim(),
@@ -144,7 +153,7 @@ export default function TasksPage() {
     }
   };
 
-  const filteredTasks = tasks.filter((t) => {
+  const filteredTasks = roomTasks.filter((t) => {
     if (filterStatus === "all") return true;
     return t.status === filterStatus;
   });
@@ -152,109 +161,188 @@ export default function TasksPage() {
   return (
     <AppShell>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <div className="h-9 w-9 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/20 shadow-xs">
-                <CheckSquare className="h-5 w-5" />
-              </div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
-                Mural de Prazos & Entregas
-              </h1>
-            </div>
-            <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">
-              Sala: <strong className="text-zinc-800 dark:text-zinc-200">{selectedRoom?.name}</strong> •{" "}
-              {isAdmin ? (
-                <span className="text-purple-600 dark:text-purple-400 font-semibold">
-                  👑 Você é Administrador (Pode adicionar, editar e excluir prazos)
-                </span>
-              ) : (
-                <span className="text-zinc-500">
-                  👀 Prazos definidos pelo criador da sala. Marque o quadrado para concluir sua parte.
-                </span>
-              )}
-            </p>
+        {/* Seletor Superior de Salas: Cada Sala Tem Seu Próprio Mural! */}
+        <div className="rounded-3xl glass-panel p-4 sm:p-5 border border-zinc-300 dark:border-zinc-800 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+              Selecione a Sala para Visualizar o Mural Isolado:
+            </span>
+            <span className="text-xs text-zinc-400">
+              {rooms.length} sala(s) cadastradas
+            </span>
           </div>
 
-          {/* Botão Novo Prazo (Aparece com destaque para Admin, ou desabilitado/informativo) */}
-          <div className="flex items-center gap-2">
-            {isAdmin ? (
-              <AppleButton
-                variant="primary"
-                size="md"
-                onClick={handleOpenCreate}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Adicionar Prazo (Admin)</span>
-              </AppleButton>
-            ) : (
-              <Badge variant="zinc" size="md">
-                <Shield className="h-3 w-3" />
-                Mural Gerenciado pelo Admin
-              </Badge>
-            )}
+          <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
+            {rooms.map((room) => {
+              const isSelected = room.id === currentRoom?.id;
+              const count = tasks.filter((t) => t.room_id === room.id).length;
+
+              return (
+                <button
+                  key={room.id}
+                  onClick={() => {
+                    setActiveRoomId(room.id);
+                    setSelectedRoom(room);
+                  }}
+                  className={cn(
+                    "px-4 py-2 rounded-2xl text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all flex items-center gap-2 border",
+                    isSelected
+                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-md scale-[1.02]"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  )}
+                >
+                  <span className="text-base">{room.sticker || "📌"}</span>
+                  <span>{room.name}</span>
+                  <span
+                    className={cn(
+                      "text-[10px] px-2 py-0.5 rounded-full font-mono",
+                      isSelected
+                        ? "bg-white/20 dark:bg-black/20 text-white dark:text-zinc-900"
+                        : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300"
+                    )}
+                  >
+                    {count} prazos
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Header da Sala Selecionada com Estilo do Banner e Tirinha */}
+        <div className="relative overflow-hidden rounded-3xl border border-zinc-300 dark:border-zinc-800 shadow-md">
+          {/* Tirinha Superior da Sala */}
+          <div
+            className="h-3 w-full"
+            style={{ backgroundColor: currentRoom?.strip_hex || "#3b82f6" }}
+          />
+
+          <div
+            className={`p-6 bg-gradient-to-r ${
+              currentRoom?.banner_gradient || "from-blue-600 to-indigo-700"
+            } text-white flex flex-col md:flex-row md:items-center justify-between gap-4`}
+          >
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-2xl p-1 rounded-xl bg-black/20 backdrop-blur-xs">
+                  {currentRoom?.sticker}
+                </span>
+                <Badge variant="zinc" size="sm" className="bg-black/30 text-white border-white/20">
+                  {currentRoom?.subject}
+                </Badge>
+                {isAdmin ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-zinc-900 font-bold flex items-center gap-1 shadow-xs">
+                    <Crown className="h-3 w-3" /> Você é Admin Desta Sala
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 text-white font-medium backdrop-blur-xs">
+                    Membro da Sala
+                  </span>
+                )}
+              </div>
+
+              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">
+                Mural de Prazos • {currentRoom?.name}
+              </h1>
+
+              <p className="text-xs text-white/90 max-w-xl">
+                {currentRoom?.description}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Link href={`/rooms/${currentRoom?.id}`}>
+                <AppleButton variant="glass" size="md" className="bg-white/20 hover:bg-white/30 text-white border-white/30 font-bold">
+                  <DoorOpen className="h-4 w-4" />
+                  <span>Acessar Sala Completa (Chat & PV)</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </AppleButton>
+              </Link>
+
+              {isAdmin && (
+                <AppleButton
+                  variant="primary"
+                  size="md"
+                  onClick={handleOpenCreate}
+                  className="bg-white text-zinc-900 hover:bg-zinc-100 font-bold shadow-md"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Novo Prazo</span>
+                </AppleButton>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Filter Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-          <button
-            onClick={() => setFilterStatus("all")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all",
-              filterStatus === "all"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "glass-subtle text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800"
-            )}
-          >
-            Todas ({tasks.length})
-          </button>
-          <button
-            onClick={() => setFilterStatus("pending")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all",
-              filterStatus === "pending"
-                ? "bg-amber-600 text-white shadow-xs"
-                : "glass-subtle text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800"
-            )}
-          >
-            Pendentes ({tasks.filter((t) => t.status === "pending").length})
-          </button>
-          <button
-            onClick={() => setFilterStatus("in_progress")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all",
-              filterStatus === "in_progress"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "glass-subtle text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800"
-            )}
-          >
-            Em Andamento ({tasks.filter((t) => t.status === "in_progress").length})
-          </button>
-          <button
-            onClick={() => setFilterStatus("completed")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all",
-              filterStatus === "completed"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "glass-subtle text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800"
-            )}
-          >
-            Concluídas ({tasks.filter((t) => t.status === "completed").length})
-          </button>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+            <button
+              onClick={() => setFilterStatus("all")}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all",
+                filterStatus === "all"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "glass-subtle text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800"
+              )}
+            >
+              Todas ({roomTasks.length})
+            </button>
+            <button
+              onClick={() => setFilterStatus("pending")}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all",
+                filterStatus === "pending"
+                  ? "bg-amber-600 text-white shadow-xs"
+                  : "glass-subtle text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800"
+              )}
+            >
+              Pendentes ({roomTasks.filter((t) => t.status === "pending").length})
+            </button>
+            <button
+              onClick={() => setFilterStatus("in_progress")}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all",
+                filterStatus === "in_progress"
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "glass-subtle text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800"
+              )}
+            >
+              Em Andamento ({roomTasks.filter((t) => t.status === "in_progress").length})
+            </button>
+            <button
+              onClick={() => setFilterStatus("completed")}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-xs font-bold apple-spring cursor-pointer shrink-0 transition-all",
+                filterStatus === "completed"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "glass-subtle text-zinc-700 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800"
+              )}
+            >
+              Concluídas ({roomTasks.filter((t) => t.status === "completed").length})
+            </button>
+          </div>
+
+          <span className="text-xs text-zinc-500 font-medium">
+            Entregas exclusivas desta sala
+          </span>
         </div>
 
         {/* Task Cards List */}
         <div className="space-y-3">
           {filteredTasks.length === 0 ? (
-            <div className="p-8 text-center rounded-3xl glass-panel border border-zinc-300 dark:border-zinc-800 text-zinc-500">
-              <CheckSquare className="h-8 w-8 mx-auto mb-2 text-zinc-400 opacity-60" />
-              <p className="font-semibold text-sm">Nenhum prazo encontrado nesta categoria.</p>
-              {isAdmin && (
-                <p className="text-xs text-zinc-400 mt-1">
-                  Como Administrador, você pode clicar em "Adicionar Prazo" para cadastrar entregas.
+            <div className="p-10 text-center rounded-3xl glass-panel border border-zinc-300 dark:border-zinc-800 text-zinc-500 space-y-2">
+              <CheckSquare className="h-9 w-9 mx-auto text-zinc-400 opacity-60" />
+              <p className="font-bold text-sm text-zinc-800 dark:text-zinc-200">
+                Nenhum prazo cadastrado para {currentRoom?.name} nesta categoria.
+              </p>
+              {isAdmin ? (
+                <p className="text-xs text-zinc-500">
+                  Como Administrador desta sala, você pode cadastrar prazos clicando em "Novo Prazo".
+                </p>
+              ) : (
+                <p className="text-xs text-zinc-500">
+                  O administrador da sala ainda não publicou atividades aqui.
                 </p>
               )}
             </div>
@@ -324,7 +412,7 @@ export default function TasksPage() {
                         </Badge>
                       </div>
 
-                      <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2">
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 line-clamp-2 font-medium">
                         {task.description}
                       </p>
 
@@ -343,14 +431,14 @@ export default function TasksPage() {
                       <>
                         <button
                           onClick={() => handleOpenEdit(task)}
-                          className="p-2 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 apple-spring"
+                          className="p-2 rounded-xl border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 apple-spring cursor-pointer"
                           title="Editar Prazo / Entrega (Admin)"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(task.id)}
-                          className="p-2 rounded-xl border border-rose-300 dark:border-rose-900/50 hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 apple-spring"
+                          className="p-2 rounded-xl border border-rose-300 dark:border-rose-900/50 hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 apple-spring cursor-pointer"
                           title="Excluir Prazo do Mural (Admin)"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -396,7 +484,7 @@ export default function TasksPage() {
         <AppleModal
           isOpen={isCreateModalOpen}
           onClose={() => setIsCreateModalOpen(false)}
-          title="👑 Adicionar Prazo Oficial no Mural"
+          title={`👑 Adicionar Prazo • ${currentRoom?.name}`}
           description="Como administrador da sala, defina o prazo e as instruções de entrega para toda a turma."
         >
           <form onSubmit={handleSaveCreate} className="space-y-4 text-xs">
@@ -424,7 +512,7 @@ export default function TasksPage() {
                   required
                   value={formSubject}
                   onChange={(e) => setFormSubject(e.target.value)}
-                  placeholder="Ex: Matemática, Biologia..."
+                  placeholder="Ex: Marketing, Gestão, TI..."
                   className="w-full px-3 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                 />
               </div>
@@ -460,7 +548,7 @@ export default function TasksPage() {
 
             <div>
               <label className="block text-zinc-900 dark:text-zinc-100 font-bold mb-1 text-xs">
-                Instruções para os Alunos
+                Instruções para os Alunos Desta Sala
               </label>
               <textarea
                 rows={3}
@@ -481,7 +569,7 @@ export default function TasksPage() {
                 Cancelar
               </AppleButton>
               <AppleButton type="submit" variant="primary" size="md">
-                Publicar no Mural
+                Publicar no Mural Desta Sala
               </AppleButton>
             </div>
           </form>

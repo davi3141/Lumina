@@ -6,10 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   DoorOpen,
-  CheckSquare,
   FileText,
-  MessageSquare,
-  Sparkles,
   Bot,
   User,
   Shield,
@@ -20,15 +17,14 @@ import { cn } from "@/lib/utils";
 import { useUser } from "@/lib/user-context";
 import { Badge } from "@/components/ui/badge";
 
+// Na barra de fora: Apenas coisas PESSOAIS e GLOBAIS
+// (Mural de Prazos, Chat e Membros ficam DENTRO de cada sala!)
 const NAV_ITEMS = [
   { name: "Início", href: "/", icon: LayoutDashboard, color: "text-blue-500 bg-blue-500/10" },
-  { name: "Salas de Aula", href: "/rooms", icon: DoorOpen, color: "text-indigo-500 bg-indigo-500/10" },
-  { name: "Mural de Prazos", href: "/tasks", icon: CheckSquare, color: "text-emerald-500 bg-emerald-500/10" },
-  { name: "Chat & PV", href: "/chat", icon: MessageSquare, color: "text-sky-500 bg-sky-500/10" },
-  { name: "Lumi IA (Tira-Dúvidas)", href: "/lumi", icon: Bot, color: "text-amber-500 bg-amber-500/10", badge: "IA" },
+  { name: "Minhas Salas de Aula", href: "/rooms", icon: DoorOpen, color: "text-indigo-500 bg-indigo-500/10", badge: "Salas" },
   { name: "Caderno Pessoal", href: "/notes", icon: FileText, color: "text-purple-500 bg-purple-500/10" },
-  { name: "Feed de Resumos", href: "/summaries", icon: Sparkles, color: "text-rose-500 bg-rose-500/10" },
-  { name: "Meu Perfil", href: "/profile", icon: User, color: "text-zinc-500 bg-zinc-500/10" },
+  { name: "Lumi IA (Assistente)", href: "/lumi", icon: Bot, color: "text-amber-500 bg-amber-500/10", badge: "IA" },
+  { name: "Meu Perfil & Avatares", href: "/profile", icon: User, color: "text-rose-500 bg-rose-500/10" },
   { name: "Como Usar (Guia)", href: "/guide", icon: HelpCircle, color: "text-teal-500 bg-teal-500/10" },
 ];
 
@@ -73,7 +69,7 @@ export function Sidebar({ mobileOpen = false, setMobileOpen }: { mobileOpen?: bo
             </div>
           </Link>
 
-          {/* Navigation Links with vibrant icon badges */}
+          {/* Navigation Links (Itens Pessoais e Globais) */}
           <nav className="flex flex-col gap-1.5">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
@@ -104,10 +100,10 @@ export function Sidebar({ mobileOpen = false, setMobileOpen }: { mobileOpen?: bo
                   {item.badge && (
                     <span
                       className={cn(
-                        "text-[10px] font-bold px-1.5 py-0.2 rounded-full",
+                        "text-[10px] font-bold px-1.5 py-0.5 rounded-full",
                         isActive
                           ? "bg-white text-blue-600"
-                          : "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                          : "bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30"
                       )}
                     >
                       {item.badge}

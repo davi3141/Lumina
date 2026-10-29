@@ -1,10 +1,21 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Profile, Room, Task, Note, ChatMessage, PvMessage } from "./mock-data";
+import {
+  Profile,
+  Room,
+  Task,
+  Note,
+  ChatMessage,
+  PvMessage,
+  GlobalNotice,
+  INITIAL_ROOMS,
+  INITIAL_TASKS,
+  INITIAL_GLOBAL_NOTICES,
+} from "./mock-data";
 import { ANIMAL_AVATARS } from "./animal-avatars";
+import { ROOM_BANNER_PRESETS, ROOM_STICKERS } from "./room-themes";
 
-// Membros fictícios para simular a turma e permitir testar o Chat PV imediatamente
 export interface RoomMemberContact {
   id: string;
   name: string;
@@ -19,33 +30,33 @@ export const CLASSMATE_CONTACTS: RoomMemberContact[] = [
     id: "usr_mariana",
     name: "Mariana Costa",
     email: "mariana.costa@estudos.com",
-    avatar_url: ANIMAL_AVATARS[3].url, // Panda com fundo sólido menta
+    avatar_url: ANIMAL_AVATARS[3].url, // Panda
     role: "moderator",
-    bio: "Focada em biologia e resumos organizados.",
+    bio: "Focada em marketing e resumos organizados.",
   },
   {
     id: "usr_pedro",
     name: "Pedro Henrique",
     email: "pedro.h@estudos.com",
-    avatar_url: ANIMAL_AVATARS[1].url, // Cachorrinho com fundo sólido azul
+    avatar_url: ANIMAL_AVATARS[1].url, // Cachorrinho
     role: "membro",
-    bio: "Gosto de resolver exercícios práticos de exatas.",
+    bio: "Especialista em finanças e planilhas.",
   },
   {
     id: "usr_sofia",
     name: "Sofia Oliveira",
     email: "sofia.o@estudos.com",
-    avatar_url: ANIMAL_AVATARS[2].url, // Raposinha com fundo sólido laranja
+    avatar_url: ANIMAL_AVATARS[2].url, // Raposinha
     role: "membro",
-    bio: "Amante de história e literatura.",
+    bio: "Estudante de engenharia e dados.",
   },
   {
     id: "usr_carlos",
     name: "Carlos Eduardo",
     email: "carlos.edu@estudos.com",
-    avatar_url: ANIMAL_AVATARS[11].url, // Coala com fundo sólido verde-água
+    avatar_url: ANIMAL_AVATARS[11].url, // Coala
     role: "membro",
-    bio: "Sempre online para tirar dúvidas rápidas.",
+    bio: "Sempre online para tirar dúvidas no PV.",
   },
 ];
 
@@ -59,19 +70,25 @@ interface UserContextType {
   rooms: Room[];
   selectedRoom: Room;
   setSelectedRoom: (room: Room) => void;
-  createRoom: (name: string, subject: string, description: string) => Room;
+  createRoom: (name: string, subject: string, description: string, sticker?: string, bannerId?: string) => Room;
   joinRoomByCode: (code: string) => { success: boolean; room?: Room; error?: string };
   updateRoom: (roomId: string, updates: Partial<Room>) => void;
   deleteRoom: (roomId: string) => void;
   isRoomAdmin: (roomId: string, userId?: string) => boolean;
   promoteMember: (roomId: string, memberId: string, role: "admin" | "moderator" | "membro") => void;
 
-  // Tasks / Mural de Prazos (Admin e Usuário)
+  // Tasks / Mural de Prazos Isolados por Sala
   tasks: Task[];
+  getTasksForRoom: (roomId: string) => Task[];
   createTask: (title: string, subject: string, dueDate: string, priority: Task["priority"], description?: string, roomId?: string) => void;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   deleteTask: (taskId: string) => void;
   toggleTaskStatus: (taskId: string) => void;
+
+  // Recados Globais da Moderação (Visíveis no Início)
+  globalNotices: GlobalNotice[];
+  createGlobalNotice: (title: string, content: string, tag?: string, priority?: GlobalNotice["priority"]) => void;
+  dismissGlobalNotice: (id: string) => void;
 
   // Notes
   notes: Note[];
@@ -99,65 +116,16 @@ const DEFAULT_USER: Profile = {
   email: "meu.usuario@estudos.com",
   display_name: "Meu Nome",
   avatar_url: ANIMAL_AVATARS[0].url, // Gatinho
-  bio: "Estudante e organizador da turma.",
+  bio: "Estudante e administrador no Lumina.",
   custom_role: "Administrador",
   role_color: "purple",
 };
-
-const DEFAULT_ROOMS: Room[] = [
-  {
-    id: "sala-principal",
-    name: "Minha Turma de Estudos",
-    subject: "Geral & Projetos",
-    description: "Espaço principal para você organizar tarefas, prazos e convidar seus amigos pelo código.",
-    invite_code: "TURMA-2026",
-    owner_id: "usr_me",
-    admins: ["usr_me"],
-    moderators: [],
-    members_count: 5,
-    banner_gradient: "from-blue-600/30 via-indigo-500/20 to-purple-600/30",
-    created_at: "2026-10-28T12:00:00Z",
-  },
-];
-
-const DEFAULT_TASKS: Task[] = [
-  {
-    id: "tsk-01",
-    room_id: "sala-principal",
-    title: "Entrega do Trabalho Bimestral",
-    description: "Revisar as referências e anexar o trabalho final no portal da turma.",
-    subject: "Geral",
-    due_date: "2026-11-04T23:59:00Z",
-    priority: "urgent",
-    status: "in_progress",
-  },
-  {
-    id: "tsk-02",
-    room_id: "sala-principal",
-    title: "Lista de Exercícios e Dúvidas",
-    description: "Fazer os exercícios de fixação e tirar dúvidas no chat ou no PV com colegas.",
-    subject: "Matemática & Ciências",
-    due_date: "2026-11-08T18:00:00Z",
-    priority: "high",
-    status: "pending",
-  },
-  {
-    id: "tsk-03",
-    room_id: "sala-principal",
-    title: "Apresentação em Grupo",
-    description: "Planejar os tópicos da apresentação de 10 minutos para a próxima aula.",
-    subject: "Projetos",
-    due_date: "2026-11-15T10:00:00Z",
-    priority: "medium",
-    status: "pending",
-  },
-];
 
 const DEFAULT_NOTES: Note[] = [
   {
     id: "note-me-01",
     title: "Meu Bloco de Notas Pessoal",
-    content: "# Meus Estudos e Metas\n\n- [x] Escolher meu avatar de animal favorito\n- [ ] Acompanhar os prazos do mural\n- [ ] Convidar amigos da turma usando o código da sala\n- [ ] Tirar dúvidas com a Lumi IA quando não entender algo",
+    content: "# Meus Estudos e Metas\n\n- [x] Escolher meu avatar de animal favorito\n- [ ] Acessar os prazos da sala de Marketing\n- [ ] Acompanhar os prazos da sala de Administração\n- [ ] Conversar com colegas no Chat PV\n- [ ] Tirar dúvidas com a Lumi IA",
     icon: "📝",
     category: "Geral",
     is_favorite: true,
@@ -174,7 +142,7 @@ const DEFAULT_PV_MESSAGES: PvMessage[] = [
     recipient_id: "usr_me",
     recipient_name: "Meu Nome",
     recipient_avatar: ANIMAL_AVATARS[0].url,
-    content: "Oi! Vi que você é o criador da sala. O mural de prazos ficou super organizado, obrigado!",
+    content: "Oi! Vi que você personalizou o banner da sala de Marketing. Ficou incrível!",
     created_at: "2026-10-28T18:40:00Z",
   },
 ];
@@ -184,9 +152,10 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUserState] = useState<Profile>(DEFAULT_USER);
   const [isCustomized, setIsCustomized] = useState(false);
-  const [rooms, setRooms] = useState<Room[]>(DEFAULT_ROOMS);
-  const [selectedRoom, setSelectedRoom] = useState<Room>(DEFAULT_ROOMS[0]);
-  const [tasks, setTasks] = useState<Task[]>(DEFAULT_TASKS);
+  const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
+  const [selectedRoom, setSelectedRoom] = useState<Room>(INITIAL_ROOMS[0]);
+  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+  const [globalNotices, setGlobalNotices] = useState<GlobalNotice[]>(INITIAL_GLOBAL_NOTICES);
   const [notes, setNotes] = useState<Note[]>(DEFAULT_NOTES);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [pvMessages, setPvMessages] = useState<PvMessage[]>(DEFAULT_PV_MESSAGES);
@@ -199,7 +168,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const savedUser = localStorage.getItem("lumina_user");
       if (savedUser) {
         const parsed = JSON.parse(savedUser);
-        // Garantir que o avatar não seja foto antiga humana
         if (parsed.avatar_url?.includes("unsplash.com") || !parsed.avatar_url) {
           parsed.avatar_url = ANIMAL_AVATARS[0].url;
         }
@@ -209,15 +177,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         setShowLoginModal(true);
       }
 
-      const savedRooms = localStorage.getItem("lumina_rooms");
+      const savedRooms = localStorage.getItem("lumina_rooms_v2");
       if (savedRooms) {
         const parsed: Room[] = JSON.parse(savedRooms);
         setRooms(parsed);
         if (parsed.length > 0) setSelectedRoom(parsed[0]);
       }
 
-      const savedTasks = localStorage.getItem("lumina_tasks");
+      const savedTasks = localStorage.getItem("lumina_tasks_v2");
       if (savedTasks) setTasks(JSON.parse(savedTasks));
+
+      const savedGlobal = localStorage.getItem("lumina_global_notices");
+      if (savedGlobal) setGlobalNotices(JSON.parse(savedGlobal));
 
       const savedNotes = localStorage.getItem("lumina_notes");
       if (savedNotes) setNotes(JSON.parse(savedNotes));
@@ -245,7 +216,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("lumina_user", JSON.stringify(updated));
   };
 
-  // Permissões rígidas: só criador ou admins explicitamente promovidos são admins
+  // Permissões de Admin rígidas: apenas quem criou ou foi promovido explicitamente
   const isRoomAdmin = (roomId: string, userId?: string): boolean => {
     const targetUserId = userId || user.id;
     const room = rooms.find((r) => r.id === roomId);
@@ -256,7 +227,6 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   };
 
   const promoteMember = (roomId: string, memberId: string, role: "admin" | "moderator" | "membro") => {
-    // Apenas quem é admin pode promover
     if (!isRoomAdmin(roomId)) {
       alert("Apenas o criador ou administradores desta sala podem alterar cargos.");
       return;
@@ -279,33 +249,46 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     });
 
     setRooms(updatedRooms);
-    localStorage.setItem("lumina_rooms", JSON.stringify(updatedRooms));
+    localStorage.setItem("lumina_rooms_v2", JSON.stringify(updatedRooms));
 
-    // Atualiza estado local de membros
     setRoomMembers((prev) =>
       prev.map((m) => (m.id === memberId ? { ...m, role } : m))
     );
   };
 
-  const createRoom = (name: string, subject: string, description: string): Room => {
+  const createRoom = (
+    name: string,
+    subject: string,
+    description: string,
+    sticker: string = "✨",
+    bannerId: string = "banner-01"
+  ): Room => {
+    const preset = ROOM_BANNER_PRESETS.find((b) => b.id === bannerId) || ROOM_BANNER_PRESETS[0];
     const randomCode = `${name.slice(0, 4).toUpperCase().replace(/[^A-Z]/g, "SALA")}-${Math.floor(1000 + Math.random() * 9000)}`;
+
     const newRoom: Room = {
       id: `sala-${Date.now()}`,
       name,
       subject: subject || "Geral",
       description: description || "Sala de estudos criada por você.",
       invite_code: randomCode,
-      owner_id: user.id, // O usuário atual é o CRIADOR
-      admins: [user.id], // Apenas ele é admin inicialmente
+      owner_id: user.id,
+      admins: [user.id],
       moderators: [],
       members_count: 1,
-      banner_gradient: "from-blue-600/30 via-indigo-500/20 to-purple-600/30",
+      banner_id: preset.id,
+      banner_gradient: preset.gradient,
+      strip_color: preset.stripColor,
+      strip_hex: preset.stripHex,
+      sticker: sticker || "✨",
+      accent_color: preset.accentBadge,
       created_at: new Date().toISOString(),
     };
+
     const updated = [newRoom, ...rooms];
     setRooms(updated);
     setSelectedRoom(newRoom);
-    localStorage.setItem("lumina_rooms", JSON.stringify(updated));
+    localStorage.setItem("lumina_rooms_v2", JSON.stringify(updated));
     return newRoom;
   };
 
@@ -317,39 +300,44 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       return { success: true, room: existing };
     }
 
-    // Ao entrar por código, o dono é o criador original fictício ("usr_owner_sala")
-    // O usuário entra como MEMBRO COMUM, não como admin!
     const joinedRoom: Room = {
       id: `joined-${Date.now()}`,
       name: `Turma (${clean})`,
       subject: "Matéria da Turma",
       description: `Sala acessada pelo código de convite ${clean}. Criada pelo professor/responsável.`,
       invite_code: clean,
-      owner_id: "usr_owner_sala", // Dono original
+      owner_id: "usr_owner_sala", // Outro usuário é o criador
       admins: ["usr_owner_sala"],
       moderators: [],
       members_count: 6,
-      banner_gradient: "from-emerald-500/30 via-teal-500/20 to-cyan-500/30",
+      banner_id: "banner-08",
+      banner_gradient: "from-violet-400 via-purple-500 to-indigo-600",
+      strip_color: "bg-violet-500",
+      strip_hex: "#8b5cf6",
+      sticker: "📚",
       created_at: new Date().toISOString(),
     };
+
     const updated = [joinedRoom, ...rooms];
     setRooms(updated);
     setSelectedRoom(joinedRoom);
-    localStorage.setItem("lumina_rooms", JSON.stringify(updated));
+    localStorage.setItem("lumina_rooms_v2", JSON.stringify(updated));
     return { success: true, room: joinedRoom };
   };
 
+  // Personalização da Sala (Apenas Admins)
   const updateRoom = (roomId: string, updates: Partial<Room>) => {
     if (!isRoomAdmin(roomId)) {
-      alert("Apenas administradores podem editar informações da sala.");
+      alert("Apenas o Administrador desta sala pode personalizar o banner, cores e figurinhas.");
       return;
     }
+
     const updated = rooms.map((r) => (r.id === roomId ? { ...r, ...updates } : r));
     setRooms(updated);
     if (selectedRoom.id === roomId) {
       setSelectedRoom({ ...selectedRoom, ...updates });
     }
-    localStorage.setItem("lumina_rooms", JSON.stringify(updated));
+    localStorage.setItem("lumina_rooms_v2", JSON.stringify(updated));
   };
 
   const deleteRoom = (roomId: string) => {
@@ -362,10 +350,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     if (selectedRoom.id === roomId && updated.length > 0) {
       setSelectedRoom(updated[0]);
     }
-    localStorage.setItem("lumina_rooms", JSON.stringify(updated));
+    localStorage.setItem("lumina_rooms_v2", JSON.stringify(updated));
   };
 
-  // Tasks & Mural de Prazos
+  // Prazos Isolados por Sala
+  const getTasksForRoom = (roomId: string): Task[] => {
+    return tasks.filter((t) => t.room_id === roomId);
+  };
+
   const createTask = (
     title: string,
     subject: string,
@@ -375,10 +367,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     roomId?: string
   ) => {
     const targetRoomId = roomId || selectedRoom.id;
-    // Criar prazo no mural oficial
     const newTask: Task = {
       id: `tsk-${Date.now()}`,
-      room_id: targetRoomId,
+      room_id: targetRoomId, // Vinculada estritamente à sala alvo!
       title,
       description: description || "Atividade cadastrada no mural da sala.",
       subject: subject || selectedRoom.subject,
@@ -388,19 +379,19 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     };
     const updated = [newTask, ...tasks];
     setTasks(updated);
-    localStorage.setItem("lumina_tasks", JSON.stringify(updated));
+    localStorage.setItem("lumina_tasks_v2", JSON.stringify(updated));
   };
 
   const updateTask = (taskId: string, updates: Partial<Task>) => {
     const updated = tasks.map((t) => (t.id === taskId ? { ...t, ...updates } : t));
     setTasks(updated);
-    localStorage.setItem("lumina_tasks", JSON.stringify(updated));
+    localStorage.setItem("lumina_tasks_v2", JSON.stringify(updated));
   };
 
   const deleteTask = (taskId: string) => {
     const updated = tasks.filter((t) => t.id !== taskId);
     setTasks(updated);
-    localStorage.setItem("lumina_tasks", JSON.stringify(updated));
+    localStorage.setItem("lumina_tasks_v2", JSON.stringify(updated));
   };
 
   const toggleTaskStatus = (taskId: string) => {
@@ -417,7 +408,31 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       return t;
     });
     setTasks(updated);
-    localStorage.setItem("lumina_tasks", JSON.stringify(updated));
+    localStorage.setItem("lumina_tasks_v2", JSON.stringify(updated));
+  };
+
+  // Recados Globais da Moderação
+  const createGlobalNotice = (title: string, content: string, tag: string = "Geral", priority: GlobalNotice["priority"] = "normal") => {
+    const newNotice: GlobalNotice = {
+      id: `gn-${Date.now()}`,
+      author_name: user.display_name,
+      author_avatar: user.avatar_url,
+      author_role: user.custom_role,
+      title,
+      content,
+      tag,
+      priority,
+      created_at: new Date().toISOString(),
+    };
+    const updated = [newNotice, ...globalNotices];
+    setGlobalNotices(updated);
+    localStorage.setItem("lumina_global_notices", JSON.stringify(updated));
+  };
+
+  const dismissGlobalNotice = (id: string) => {
+    const updated = globalNotices.filter((n) => n.id !== id);
+    setGlobalNotices(updated);
+    localStorage.setItem("lumina_global_notices", JSON.stringify(updated));
   };
 
   // Notes
@@ -506,10 +521,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         isRoomAdmin,
         promoteMember,
         tasks,
+        getTasksForRoom,
         createTask,
         updateTask,
         deleteTask,
         toggleTaskStatus,
+        globalNotices,
+        createGlobalNotice,
+        dismissGlobalNotice,
         notes,
         createNote,
         updateNote,

@@ -1,4 +1,5 @@
 import { ANIMAL_AVATARS } from "./animal-avatars";
+import { ROOM_BANNER_PRESETS, ROOM_STICKERS } from "./room-themes";
 
 export interface Profile {
   id: string;
@@ -20,7 +21,12 @@ export interface Room {
   admins?: string[];
   moderators?: string[];
   members_count: number;
+  banner_id?: string;
   banner_gradient: string;
+  strip_color: string; // Cor da tirinha superior da sala
+  strip_hex?: string;
+  sticker: string; // Figurinha/Emoji temático da sala (ex: 📊, 💼, 💻)
+  accent_color?: string;
   created_at: string;
 }
 
@@ -36,6 +42,18 @@ export interface Notice {
   content: string;
   priority: 'low' | 'normal' | 'urgent';
   is_pinned: boolean;
+  created_at: string;
+}
+
+export interface GlobalNotice {
+  id: string;
+  author_name: string;
+  author_avatar: string;
+  author_role: string;
+  title: string;
+  content: string;
+  tag: string;
+  priority: 'low' | 'normal' | 'urgent';
   created_at: string;
 }
 
@@ -97,151 +115,242 @@ export const CURRENT_USER: Profile = {
   id: 'usr_me',
   email: 'meu.usuario@estudos.com',
   display_name: 'Meu Nome',
-  avatar_url: ANIMAL_AVATARS[0].url, // Gatinho com fundo sólido
-  bio: 'Estudante ativo da turma.',
+  avatar_url: ANIMAL_AVATARS[0].url, // Gatinho
+  bio: 'Estudante ativo no Lumina.',
   custom_role: 'Administrador',
   role_color: 'purple',
 };
 
+// 3 Salas Iniciais Completamente Diferentes em Banners, Cores de Tirinha e Figurinhas
 export const INITIAL_ROOMS: Room[] = [
   {
-    id: 'sala-principal',
-    name: 'Turma de Estudos & Projetos',
-    subject: 'Ciência & Tecnologia',
-    description: 'Espaço colaborativo para acompanhar prazos, debater dúvidas e compartilhar notas.',
-    invite_code: 'LUMINA-2026',
+    id: 'sala-marketing',
+    name: 'Marketing Digital & Mídia',
+    subject: 'Marketing',
+    description: 'Sala focada em criação de campanhas, branding, análise de tráfego e métricas de conversão.',
+    invite_code: 'MKT-2026',
     owner_id: 'usr_me',
     admins: ['usr_me'],
     moderators: [],
-    members_count: 5,
-    banner_gradient: 'from-blue-600/30 via-indigo-500/20 to-purple-600/30',
+    members_count: 8,
+    banner_id: 'banner-02',
+    banner_gradient: 'from-amber-400 via-orange-500 to-rose-600',
+    strip_color: 'bg-orange-500',
+    strip_hex: '#f97316',
+    sticker: '📊',
+    accent_color: 'amber',
     created_at: '2026-10-28T10:00:00Z',
+  },
+  {
+    id: 'sala-administracao',
+    name: 'Administração & Finanças',
+    subject: 'Administração',
+    description: 'Planejamento orçamentário, gestão de equipes, cases empresariais e fluxo de caixa.',
+    invite_code: 'ADM-2026',
+    owner_id: 'usr_me',
+    admins: ['usr_me'],
+    moderators: [],
+    members_count: 12,
+    banner_id: 'banner-17',
+    banner_gradient: 'from-blue-700 via-indigo-800 to-slate-900',
+    strip_color: 'bg-indigo-600',
+    strip_hex: '#4f46e5',
+    sticker: '💼',
+    accent_color: 'blue',
+    created_at: '2026-10-28T11:00:00Z',
+  },
+  {
+    id: 'sala-software',
+    name: 'Engenharia de Software',
+    subject: 'Tecnologia',
+    description: 'Arquitetura de sistemas distribuídos, banco de dados PostgreSQL e boas práticas de código.',
+    invite_code: 'TECH-2026',
+    owner_id: 'usr_me',
+    admins: ['usr_me'],
+    moderators: [],
+    members_count: 15,
+    banner_id: 'banner-05',
+    banner_gradient: 'from-fuchsia-600 via-purple-700 to-cyan-500',
+    strip_color: 'bg-fuchsia-500',
+    strip_hex: '#d946ef',
+    sticker: '💻',
+    accent_color: 'purple',
+    created_at: '2026-10-28T12:00:00Z',
+  },
+];
+
+// Recados Globais da Moderação (Visíveis no Início sem precisar entrar na sala)
+export const INITIAL_GLOBAL_NOTICES: GlobalNotice[] = [
+  {
+    id: 'global-01',
+    author_name: 'Moderação Lumina',
+    author_avatar: ANIMAL_AVATARS[6].url, // Corujinha
+    author_role: 'Administração Geral',
+    title: '📢 Abertura do Período de Entregas Bimestrais',
+    content: 'Atenção a todos os alunos! Os murais de prazos de cada sala (Marketing, Administração e TI) foram configurados pelos administradores com as datas limites de entrega.',
+    tag: 'Geral',
+    priority: 'urgent',
+    created_at: '2026-10-28T18:00:00Z',
+  },
+  {
+    id: 'global-02',
+    author_name: 'Coordenação Acadêmica',
+    author_avatar: ANIMAL_AVATARS[3].url, // Panda
+    author_role: 'Monitoria',
+    title: '🐾 Novidade: 40 Avatares Animais & Chat PV Liberados',
+    content: 'Personalize seu perfil com qualquer um dos 40 bichinhos e chame colegas para conversar no PV sem sair da plataforma.',
+    tag: 'Atualização',
+    priority: 'normal',
+    created_at: '2026-10-28T16:30:00Z',
+  },
+  {
+    id: 'global-03',
+    author_name: 'Lumi IA',
+    author_avatar: ANIMAL_AVATARS[28].url, // Abelhinha
+    author_role: 'Assistente Inteligente',
+    title: '💡 Dúvidas nas Matérias? A Lumi Está Disponível 24h',
+    content: 'Se tiver dificuldade com exercícios ou precisar de dicas de estudo, abra a aba Lumi IA para receber respostas simples e mastigadas.',
+    tag: 'Estudos',
+    priority: 'normal',
+    created_at: '2026-10-28T14:00:00Z',
+  },
+];
+
+// Prazos Isolados por Sala (Marketing tem seus prazos, Administração tem os seus!)
+export const INITIAL_TASKS: Task[] = [
+  // Prazos Exclusivos da Sala de Marketing
+  {
+    id: 'tsk-mkt-01',
+    room_id: 'sala-marketing',
+    title: 'Planejamento de Campanha no TikTok & Instagram',
+    description: 'Entregar o cronograma de 15 postagens com roteiro e personas validadas.',
+    subject: 'Marketing',
+    due_date: '2026-11-05T23:59:00Z',
+    priority: 'urgent',
+    status: 'in_progress',
+  },
+  {
+    id: 'tsk-mkt-02',
+    room_id: 'sala-marketing',
+    title: 'Relatório de Métricas & CAC da Campanha',
+    description: 'Calcular o Custo de Aquisição de Clientes (CAC) e taxa de conversão da landing page.',
+    subject: 'Marketing',
+    due_date: '2026-11-09T18:00:00Z',
+    priority: 'high',
+    status: 'pending',
+  },
+
+  // Prazos Exclusivos da Sala de Administração
+  {
+    id: 'tsk-adm-01',
+    room_id: 'sala-administracao',
+    title: 'Balanço Patrimonial & Demonstrativo de Resultados (DRE)',
+    description: 'Montar a planilha de conciliação fiscal e calcular margem de contribuição.',
+    subject: 'Administração',
+    due_date: '2026-11-06T20:00:00Z',
+    priority: 'urgent',
+    status: 'pending',
+  },
+  {
+    id: 'tsk-adm-02',
+    room_id: 'sala-administracao',
+    title: 'Plano de Negócios e Matriz SWOT',
+    description: 'Entrega da análise setorial com forças, fraquezas, oportunidades e ameaças da empresa.',
+    subject: 'Administração',
+    due_date: '2026-11-12T14:00:00Z',
+    priority: 'medium',
+    status: 'pending',
+  },
+
+  // Prazos Exclusivos da Sala de Engenharia de Software
+  {
+    id: 'tsk-tech-01',
+    room_id: 'sala-software',
+    title: 'Diagrama C4 de Arquitetura de Microserviços',
+    description: 'Desenhar os níveis Context, Container e Component para a API da turma.',
+    subject: 'Tecnologia',
+    due_date: '2026-11-04T22:00:00Z',
+    priority: 'high',
+    status: 'in_progress',
+  },
+  {
+    id: 'tsk-tech-02',
+    room_id: 'sala-software',
+    title: 'Modelagem do Banco de Dados PostgreSQL & RLS',
+    description: 'Escrever scripts DDL com constraints e políticas de Row Level Security.',
+    subject: 'Tecnologia',
+    due_date: '2026-11-10T19:00:00Z',
+    priority: 'medium',
+    status: 'pending',
   },
 ];
 
 export const INITIAL_NOTICES: Notice[] = [
   {
     id: 'not-01',
-    room_id: 'sala-principal',
+    room_id: 'sala-marketing',
     author: {
-      name: 'Professor / Admin',
-      avatar: ANIMAL_AVATARS[6].url, // Corujinha sábia
+      name: 'Admin Marketing',
+      avatar: ANIMAL_AVATARS[2].url, // Raposinha
       role: 'Administrador',
     },
-    title: '📌 Mural de Prazos Atualizado',
-    content: 'Todos os prazos e entregas do bimestre foram adicionados pelo Administrador no mural. Fiquem atentos às datas!',
+    title: '📌 Alinhamento das Métricas do Trabalho',
+    content: 'O prazo de entrega da campanha foi fixado para o dia 05. Dúvidas no chat da turma!',
     priority: 'urgent',
     is_pinned: true,
     created_at: '2026-10-28T16:00:00Z',
   },
 ];
 
-export const INITIAL_TASKS: Task[] = [
-  {
-    id: 'tsk-01',
-    room_id: 'sala-principal',
-    title: 'Entrega do Artigo e Relatório de Pesquisa',
-    description: 'Enviar o documento em PDF revisado com todas as referências bibliográficas.',
-    subject: 'Metodologia',
-    due_date: '2026-11-04T23:59:00Z',
-    priority: 'urgent',
-    status: 'in_progress',
-  },
-  {
-    id: 'tsk-02',
-    room_id: 'sala-principal',
-    title: 'Lista de Exercícios Práticos #02',
-    description: 'Resolver os 10 exercícios da apostila e comparar as respostas no chat.',
-    subject: 'Matemática & Lógica',
-    due_date: '2026-11-07T18:00:00Z',
-    priority: 'high',
-    status: 'pending',
-  },
-  {
-    id: 'tsk-03',
-    room_id: 'sala-principal',
-    title: 'Seminário em Grupo: Tecnologias Modernas',
-    description: 'Apresentação curta de 15 minutos destacando pontos práticos e benefícios.',
-    subject: 'Tecnologia',
-    due_date: '2026-11-12T14:00:00Z',
-    priority: 'medium',
-    status: 'pending',
-  },
-];
-
 export const INITIAL_NOTES: Note[] = [
   {
     id: 'note-01',
-    title: 'Guia de Estudos & Cronograma Pessoal',
-    content: `# Meu Plano de Estudos\n\n- [x] Entrar nas salas com código de convite\n- [ ] Revisar prazos semanais no Mural\n- [ ] Tirar dúvidas com colegas no Chat PV\n- [ ] Usar a Lumi IA para simplificar conceitos difíceis`,
+    title: 'Meu Bloco de Notas Pessoal',
+    content: `# Minhas Metas & Revisões\n\n- [ ] Acessar o mural da sala de Marketing\n- [ ] Revisar tarefas da sala de Administração\n- [ ] Tirar dúvidas no Chat PV\n- [ ] Pedir dicas para a Lumi IA`,
     icon: '📝',
     category: 'Geral',
     is_favorite: true,
     updated_at: '2026-10-28T19:40:00Z',
-  },
-  {
-    id: 'note-02',
-    title: 'Resumos Rápidos para a Prova',
-    content: `# Resumo de Fórmulas e Conceitos\n\n- Revisar conceitos fundamentais\n- Focar nas questões com maior peso\n- Praticar pelo menos 30 minutos por dia`,
-    icon: '⚡',
-    category: 'Estudos',
-    is_favorite: true,
-    updated_at: '2026-10-28T14:10:00Z',
   },
 ];
 
 export const INITIAL_MESSAGES: ChatMessage[] = [
   {
     id: 'msg-01',
-    room_id: 'sala-principal',
+    room_id: 'sala-marketing',
     user: {
-      id: 'usr_amigo_01',
+      id: 'usr_mariana',
       email: 'mariana@estudos.com',
-      display_name: 'Mariana',
-      avatar_url: ANIMAL_AVATARS[3].url, // Panda
-      bio: 'Focada em resumos e química.',
+      display_name: 'Mariana Costa',
+      avatar_url: ANIMAL_AVATARS[3].url,
+      bio: 'Focada em marketing e design.',
       custom_role: 'Moderador',
       role_color: 'emerald',
     },
-    content: 'Olá pessoal! O mural de prazos foi atualizado pelo Admin. Não se esqueçam de marcar as tarefas conforme forem concluindo!',
+    content: 'Olá pessoal da turma de Marketing! Postei as referências no mural.',
     created_at: '2026-10-28T18:30:00Z',
-  },
-  {
-    id: 'msg-02',
-    room_id: 'sala-principal',
-    user: {
-      id: 'usr_amigo_02',
-      email: 'pedro@estudos.com',
-      display_name: 'Pedro',
-      avatar_url: ANIMAL_AVATARS[1].url, // Cachorrinho
-      bio: 'Estudante curioso.',
-      custom_role: 'Aluno Destaque',
-      role_color: 'blue',
-    },
-    content: 'Boa! Qualquer dúvida nos exercícios podem me chamar no Chat PV que ajudo a resolver.',
-    created_at: '2026-10-28T18:35:00Z',
   },
 ];
 
 export const INITIAL_SUMMARIES: SummaryItem[] = [
   {
     id: 'sum-01',
-    room_id: 'sala-principal',
+    room_id: 'sala-marketing',
     author: {
-      id: 'usr_amigo_01',
+      id: 'usr_mariana',
       email: 'mariana@estudos.com',
-      display_name: 'Mariana',
+      display_name: 'Mariana Costa',
       avatar_url: ANIMAL_AVATARS[3].url,
       bio: 'Moderadora',
       custom_role: 'Moderador',
       role_color: 'emerald',
     },
-    title: 'Resumo Completo: Métodos Ágeis e Gestão de Tempo',
-    subject: 'Metodologia',
-    description: 'Guia prático para organizar semanas de estudo com blocos de foco de 25 minutos.',
-    likes_count: 24,
+    title: 'Resumo Completo: Funil de Conversão & Inbound Marketing',
+    subject: 'Marketing',
+    description: 'Etapas de atração, conversão, fechamento e encantamento explicadas com exemplos.',
+    likes_count: 18,
     is_liked: true,
-    tags: ['Produtividade', 'Estudos', 'Organização'],
+    tags: ['Marketing', 'Funil', 'Vendas'],
     created_at: '2026-10-28T14:00:00Z',
   },
 ];

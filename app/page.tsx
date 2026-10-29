@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
+import { GlobalNotices } from "@/components/dashboard/global-notices";
 import { NoticeBanner } from "@/components/dashboard/notice-banner";
 import { DeadlineWidget } from "@/components/dashboard/deadline-widget";
 import { InteractiveGuideModal } from "@/components/guide/interactive-guide-modal";
 import { useUser } from "@/lib/user-context";
 import {
   INITIAL_NOTICES,
-  INITIAL_SUMMARIES,
 } from "@/lib/mock-data";
 import {
   Sparkles,
@@ -23,13 +23,14 @@ import {
   HelpCircle,
   DoorOpen,
   Lock,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { AppleButton } from "@/components/ui/apple-button";
 import { Badge } from "@/components/ui/badge";
 
 export default function DashboardPage() {
-  const { user, selectedRoom, tasks, messages, pvMessages, setShowLoginModal } = useUser();
+  const { user, rooms, selectedRoom, setSelectedRoom, tasks, messages, pvMessages, setShowLoginModal } = useUser();
   const [copiedCode, setCopiedCode] = useState(false);
   const [guideModalOpen, setGuideModalOpen] = useState(false);
 
@@ -42,7 +43,7 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="space-y-8">
+      <div className="space-y-7">
         {/* Apple-style Hero Section with High Contrast */}
         <section className="relative overflow-hidden rounded-3xl glass-panel p-6 sm:p-8 lg:p-10 border border-zinc-300 dark:border-zinc-800 shadow-md">
           {/* Subtle Ambient Radial Highlight */}
@@ -70,9 +71,9 @@ export default function DashboardPage() {
               <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 max-w-2xl leading-relaxed">
                 Bem-vindo ao seu espaço de estudos. Você está na sala{" "}
                 <strong className="text-zinc-900 dark:text-zinc-100 font-bold">
-                  {selectedRoom?.name || "Minha Turma"}
+                  {selectedRoom?.sticker} {selectedRoom?.name || "Minha Turma"}
                 </strong>
-                . Acompanhe os prazos definidos pelo Admin no mural, converse com os colegas na sala ou no PV e tire dúvidas com a Lumi IA.
+                . Acompanhe os prazos exclusivos definidos pelo Admin no mural da sala, converse com os colegas na turma ou no chat PV e tire dúvidas com a Lumi IA.
               </p>
 
               {/* Invite Code Quick Pill */}
@@ -102,21 +103,57 @@ export default function DashboardPage() {
 
             {/* Quick Action Buttons */}
             <div className="flex flex-row lg:flex-col gap-2.5 shrink-0">
-              <Link href={`/rooms/${selectedRoom?.id || "sala-principal"}`}>
+              <Link href={`/rooms/${selectedRoom?.id || "sala-marketing"}`}>
                 <AppleButton variant="primary" size="md" className="w-full font-bold shadow-md bg-blue-600 hover:bg-blue-700 text-white">
                   <DoorOpen className="h-4 w-4" />
                   <span>Acessar Sala (Ver Tudo)</span>
                 </AppleButton>
               </Link>
 
-              <Link href="/tasks">
+              <Link href="/rooms">
                 <AppleButton variant="glass" size="md" className="w-full">
-                  <Calendar className="h-4 w-4 text-emerald-600" />
-                  <span>Mural de Prazos</span>
+                  <Users className="h-4 w-4 text-indigo-600" />
+                  <span>Ver Todas as Salas</span>
                 </AppleButton>
               </Link>
             </div>
           </div>
+
+          {/* Quick Room Selector Strip */}
+          <div className="mt-6 pt-5 border-t border-zinc-200/80 dark:border-zinc-800 flex items-center gap-2 overflow-x-auto no-scrollbar">
+            <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider shrink-0 mr-1">
+              Suas Salas:
+            </span>
+            {rooms.map((room) => {
+              const isCurrent = room.id === selectedRoom?.id;
+              return (
+                <button
+                  key={room.id}
+                  onClick={() => setSelectedRoom(room)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all apple-spring flex items-center gap-2 shrink-0 border cursor-pointer ${
+                    isCurrent
+                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-sm"
+                      : "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                  }`}
+                >
+                  <span className="text-sm">{room.sticker}</span>
+                  <span>{room.name}</span>
+                </button>
+              );
+            })}
+            <Link
+              href="/rooms"
+              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 transition-colors flex items-center gap-1 shrink-0"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>Entrar em Outra Sala</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* 📢 Recados Globais da Moderação (Visíveis no Início sem precisar entrar na sala) */}
+        <section>
+          <GlobalNotices />
         </section>
 
         {/* Interactive Guide Quick Banner */}
@@ -138,7 +175,7 @@ export default function DashboardPage() {
                 Como Usar Todas as Funções do Lumina
               </h3>
               <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5">
-                Saiba como funciona a permissão de administrador, prazos do mural, chat privado e a Lumi IA.
+                Saiba como funciona a permissão de administrador, personalização de salas, prazos do mural, chat privado e a Lumi IA.
               </p>
             </div>
           </div>
@@ -158,11 +195,6 @@ export default function DashboardPage() {
               </AppleButton>
             </Link>
           </div>
-        </section>
-
-        {/* Notice Banner (Pinned Notices) */}
-        <section>
-          <NoticeBanner notices={INITIAL_NOTICES} />
         </section>
 
         {/* Stats Row */}
@@ -208,9 +240,9 @@ export default function DashboardPage() {
               <Users className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold">Membros na Sala</p>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 font-semibold">Salas Cadastradas</p>
               <h3 className="text-xl font-extrabold text-zinc-900 dark:text-zinc-100">
-                {selectedRoom?.members_count || 1}
+                {rooms.length} turmas
               </h3>
             </div>
           </div>
@@ -249,7 +281,7 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed font-medium">
                 🐾 <em>"Precisa de ajuda com alguma matéria ou não sabe como começar a estudar? Me pergunte qualquer coisa que eu explico bem mastigadinho!"</em>
               </div>
 
@@ -285,7 +317,7 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <Link href="/chat">
+                <Link href={`/rooms/${selectedRoom?.id || "sala-marketing"}`}>
                   <AppleButton variant="glass" size="sm">
                     <span>Abrir Chat</span>
                     <ArrowUpRight className="h-3 w-3" />
@@ -297,9 +329,9 @@ export default function DashboardPage() {
                 {(messages.length > 0 ? messages.slice(-2) : [
                   {
                     id: "msg-welcome",
-                    room_id: selectedRoom?.id || "sala-principal",
+                    room_id: selectedRoom?.id || "sala-marketing",
                     user: user,
-                    content: `Olá pessoal! Bem-vindos ao mural e chat da sala.`,
+                    content: `Olá pessoal! Bem-vindos ao mural e chat da sala ${selectedRoom?.name || ""}.`,
                     created_at: "2026-10-28T18:00:00Z",
                   }
                 ]).map((msg) => (
@@ -321,7 +353,7 @@ export default function DashboardPage() {
                           {msg.user.custom_role}
                         </span>
                       </div>
-                      <p className="text-zinc-700 dark:text-zinc-300 truncate mt-0.5">
+                      <p className="text-zinc-700 dark:text-zinc-300 truncate mt-0.5 font-medium">
                         {msg.content}
                       </p>
                     </div>
