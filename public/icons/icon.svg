@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="50%" stop-color="#4f46e5" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="glow" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="128" fill="url(#bg)" />
+  <circle cx="256" cy="200" r="180" fill="url(#glow)" />
+  
+  <!-- Lumina Floating Emblem -->
+  <!-- Back Layer -->
+  <polygon points="256,220 370,285 256,350 142,285" fill="#ffffff" fill-opacity="0.45" />
+  <!-- Mid Layer -->
+  <polygon points="256,170 355,235 256,300 157,235" fill="#ffffff" fill-opacity="0.75" />
+  <!-- Top Layer -->
+  <polygon points="256,120 340,185 256,250 172,185" fill="#ffffff" />
+  
+  <!-- Spark Center -->
+  <circle cx="256" cy="185" r="16" fill="#ffffff" filter="drop-shadow(0px 0px 8px rgba(255,255,255,0.8))" />
+</svg>
