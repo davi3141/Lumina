@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import { Profile, CURRENT_USER } from "@/lib/mock-data";
+import React, { useState, useEffect } from "react";
+import { Profile } from "@/lib/mock-data";
 import { Shield, Sparkles, Check, Camera, Mail, AtSign, Award } from "lucide-react";
 import { AppleButton } from "@/components/ui/apple-button";
 import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/lib/user-context";
 
 const ROLE_OPTIONS: { role: Profile["custom_role"]; color: Profile["role_color"]; desc: string }[] = [
   { role: "Administrador", color: "purple", desc: "Acesso total à gestão de salas, prazos e banimentos." },
@@ -23,13 +24,23 @@ const AVATAR_PRESETS = [
 ];
 
 export function ProfileEditor() {
-  const [profile, setProfile] = useState<Profile>(CURRENT_USER);
-  const [displayName, setDisplayName] = useState(profile.display_name);
-  const [bio, setBio] = useState(profile.bio);
-  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url);
-  const [customRole, setCustomRole] = useState(profile.custom_role);
-  const [roleColor, setRoleColor] = useState(profile.role_color);
+  const { user, updateUser } = useUser();
+  const [displayName, setDisplayName] = useState(user.display_name);
+  const [email, setEmail] = useState(user.email);
+  const [bio, setBio] = useState(user.bio);
+  const [avatarUrl, setAvatarUrl] = useState(user.avatar_url);
+  const [customRole, setCustomRole] = useState(user.custom_role);
+  const [roleColor, setRoleColor] = useState(user.role_color);
   const [savedSuccess, setSavedSuccess] = useState(false);
+
+  useEffect(() => {
+    setDisplayName(user.display_name);
+    setEmail(user.email);
+    setBio(user.bio);
+    setAvatarUrl(user.avatar_url);
+    setCustomRole(user.custom_role);
+    setRoleColor(user.role_color);
+  }, [user]);
 
   const handleSelectRole = (role: Profile["custom_role"], color: Profile["role_color"]) => {
     setCustomRole(role);
@@ -38,9 +49,9 @@ export function ProfileEditor() {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setProfile({
-      ...profile,
+    updateUser({
       display_name: displayName,
+      email,
       bio,
       avatar_url: avatarUrl,
       custom_role: customRole,
@@ -79,7 +90,7 @@ export function ProfileEditor() {
               </Badge>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              {profile.email} • Membro desde Outubro 2026
+              {user.email} • Membro desde Outubro 2026
             </p>
             <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 max-w-xl leading-relaxed pt-1">
               "{bio}"

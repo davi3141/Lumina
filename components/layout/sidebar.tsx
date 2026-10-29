@@ -17,7 +17,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CURRENT_USER } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 import { Badge } from "@/components/ui/badge";
 
 const NAV_ITEMS = [
@@ -34,6 +34,7 @@ const NAV_ITEMS = [
 
 export function Sidebar({ mobileOpen = false, setMobileOpen }: { mobileOpen?: boolean; setMobileOpen?: (v: boolean) => void }) {
   const pathname = usePathname();
+  const { user } = useUser();
 
   return (
     <>
@@ -103,25 +104,25 @@ export function Sidebar({ mobileOpen = false, setMobileOpen }: { mobileOpen?: bo
         </div>
 
         {/* User Card Apple Style */}
-        <div className="pt-4 border-t border-zinc-200/40 dark:border-zinc-800/60">
+        <div className="pt-4 border-t border-zinc-300 dark:border-zinc-800">
           <Link
             href="/profile"
             onClick={() => setMobileOpen?.(false)}
-            className="flex items-center gap-3 p-2 rounded-2xl glass-subtle hover:bg-white/80 dark:hover:bg-white/5 apple-spring"
+            className="flex items-center gap-3 p-2 rounded-2xl glass-subtle border border-zinc-200 dark:border-zinc-800 hover:bg-white/80 dark:hover:bg-white/5 apple-spring"
           >
             <img
-              src={CURRENT_USER.avatar_url}
-              alt={CURRENT_USER.display_name}
+              src={user.avatar_url}
+              alt={user.display_name}
               className="h-10 w-10 rounded-full object-cover ring-2 ring-purple-500/30"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                {CURRENT_USER.display_name}
+              <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                {user.display_name}
               </p>
               <div className="flex items-center gap-1 mt-0.5">
-                <Badge variant={CURRENT_USER.role_color} size="sm">
+                <Badge variant={user.role_color} size="sm">
                   <Shield className="h-2.5 w-2.5" />
-                  {CURRENT_USER.custom_role}
+                  {user.custom_role}
                 </Badge>
               </div>
             </div>

@@ -5,12 +5,9 @@ import { AppShell } from "@/components/layout/app-shell";
 import { NoticeBanner } from "@/components/dashboard/notice-banner";
 import { DeadlineWidget } from "@/components/dashboard/deadline-widget";
 import { InteractiveGuideModal } from "@/components/guide/interactive-guide-modal";
+import { useUser } from "@/lib/user-context";
 import {
-  CURRENT_USER,
-  INITIAL_ROOMS,
   INITIAL_NOTICES,
-  INITIAL_TASKS,
-  INITIAL_MESSAGES,
   INITIAL_SUMMARIES,
 } from "@/lib/mock-data";
 import {
@@ -27,18 +24,20 @@ import {
   Check,
   HelpCircle,
   Lightbulb,
+  DoorOpen,
 } from "lucide-react";
 import Link from "next/link";
 import { AppleButton } from "@/components/ui/apple-button";
 import { Badge } from "@/components/ui/badge";
 
 export default function DashboardPage() {
-  const [activeRoom, setActiveRoom] = useState(INITIAL_ROOMS[0]);
+  const { user, selectedRoom, tasks, messages, setShowLoginModal } = useUser();
   const [copiedCode, setCopiedCode] = useState(false);
   const [guideModalOpen, setGuideModalOpen] = useState(false);
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(activeRoom.invite_code);
+    if (!selectedRoom) return;
+    navigator.clipboard.writeText(selectedRoom.invite_code);
     setCopiedCode(true);
     setTimeout(() => setCopiedCode(false), 2000);
   };
@@ -46,73 +45,76 @@ export default function DashboardPage() {
   return (
     <AppShell>
       <div className="space-y-8">
-        {/* Apple-style Hero Section */}
-        <section className="relative overflow-hidden rounded-3xl glass-panel p-6 sm:p-8 lg:p-10 border shadow-sm">
+        {/* Apple-style Hero Section with High Contrast */}
+        <section className="relative overflow-hidden rounded-3xl glass-panel p-6 sm:p-8 lg:p-10 border border-zinc-300 dark:border-zinc-800 shadow-md">
           {/* Subtle Ambient Radial Highlight */}
           <div className="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 rounded-full bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-transparent blur-3xl pointer-events-none" />
 
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="space-y-3">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant={CURRENT_USER.role_color} size="md">
+                <Badge variant={user.role_color} size="md">
                   <Shield className="h-3 w-3" />
-                  {CURRENT_USER.custom_role}
+                  {user.custom_role}
                 </Badge>
-                <span className="text-xs text-zinc-400">
-                  Semestre 2026.2 • Sala Principal
-                </span>
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline cursor-pointer"
+                >
+                  (Alterar seu nome / conta)
+                </button>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-                Olá, {CURRENT_USER.display_name.split(" ")[0]}!
+              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
+                Olá, {user.display_name}!
               </h1>
 
-              <p className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-300 max-w-2xl leading-relaxed">
-                Bem-vindo ao seu espaço integrado de estudos. Você está conectado à sala{" "}
-                <strong className="text-zinc-900 dark:text-zinc-100 font-semibold">
-                  {activeRoom.name}
+              <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 max-w-2xl leading-relaxed">
+                Bem-vindo ao seu espaço de estudos. Você está na sala{" "}
+                <strong className="text-zinc-900 dark:text-zinc-100 font-bold">
+                  {selectedRoom?.name || "Minha Turma"}
                 </strong>
-                . Acompanhe os prazos da semana, faça anotações no seu caderno Notion e colabore no Canva.
+                . Clique no botão de acessar a sala para ver a visão completa com mural, chat e slides Canva.
               </p>
 
               {/* Invite Code Quick Pill */}
               <div className="flex items-center gap-2 pt-1 flex-wrap">
-                <div className="px-3 py-1.5 rounded-2xl glass-subtle border text-xs flex items-center gap-2">
-                  <span className="text-zinc-400">Código de Acesso da Sala:</span>
-                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
-                    {activeRoom.invite_code}
+                <div className="px-3.5 py-2 rounded-2xl glass-subtle border border-zinc-300 dark:border-zinc-700 text-xs flex items-center gap-2">
+                  <span className="text-zinc-600 dark:text-zinc-400 font-medium">Código da Sala:</span>
+                  <span className="font-mono font-bold text-blue-600 dark:text-blue-400 text-sm">
+                    {selectedRoom?.invite_code}
                   </span>
                   <button
                     onClick={handleCopyCode}
-                    className="p-1 hover:text-blue-500 apple-spring cursor-pointer"
+                    className="p-1 hover:text-blue-600 apple-spring cursor-pointer"
                     title="Copiar código"
                   >
                     {copiedCode ? (
                       <Check className="h-3.5 w-3.5 text-emerald-500" />
                     ) : (
-                      <Copy className="h-3.5 w-3.5 text-zinc-400" />
+                      <Copy className="h-3.5 w-3.5 text-zinc-500" />
                     )}
                   </button>
                 </div>
-                <span className="text-xs text-zinc-400">
-                  {activeRoom.members_count} colegas ativos
+                <span className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">
+                  {selectedRoom?.members_count || 1} participante(s)
                 </span>
               </div>
             </div>
 
             {/* Quick Action Buttons */}
             <div className="flex flex-row lg:flex-col gap-2.5 shrink-0">
-              <Link href="/tasks">
-                <AppleButton variant="primary" size="md" className="w-full">
-                  <Calendar className="h-4 w-4" />
-                  <span>Mural de Tarefas</span>
+              <Link href={`/rooms/${selectedRoom?.id || "sala-principal"}`}>
+                <AppleButton variant="primary" size="md" className="w-full font-bold shadow-md">
+                  <DoorOpen className="h-4 w-4" />
+                  <span>Acessar Esta Sala (Ver Tudo)</span>
                 </AppleButton>
               </Link>
 
-              <Link href="/canva">
+              <Link href="/tasks">
                 <AppleButton variant="glass" size="md" className="w-full">
-                  <Presentation className="h-4 w-4 text-purple-500" />
-                  <span>Central Canva</span>
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <span>Mural de Tarefas</span>
                 </AppleButton>
               </Link>
             </div>
@@ -172,9 +174,9 @@ export default function DashboardPage() {
               <Calendar className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-zinc-400 font-medium">Prazos Ativos</p>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Prazos Ativos</p>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-                {INITIAL_TASKS.filter((t) => t.status !== "completed").length}
+                {tasks.filter((t) => t.status !== "completed").length}
               </h3>
             </div>
           </div>
@@ -208,9 +210,9 @@ export default function DashboardPage() {
               <Users className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-zinc-400 font-medium">Membros da Sala</p>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium">Membros da Sala</p>
               <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-                {activeRoom.members_count}
+                {selectedRoom?.members_count || 1}
               </h3>
             </div>
           </div>
@@ -220,24 +222,24 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left: Mural de Atividades e Prazos com Resend */}
           <div className="lg:col-span-7 space-y-6">
-            <DeadlineWidget initialTasks={INITIAL_TASKS} />
+            <DeadlineWidget initialTasks={tasks} />
           </div>
 
           {/* Right: Canva Hub Preview & Chat Snippet */}
           <div className="lg:col-span-5 space-y-6">
             {/* Canva Highlight Card */}
-            <div className="rounded-3xl glass-panel p-6 border space-y-4">
+            <div className="rounded-3xl glass-panel p-6 border border-zinc-300 dark:border-zinc-800 space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
                     <Presentation className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
                       Canva da Sala
                     </h3>
-                    <p className="text-[11px] text-zinc-400">
-                      Slides do Seminário Final
+                    <p className="text-[11px] text-zinc-500">
+                      Slides Oficiais da Turma
                     </p>
                   </div>
                 </div>
@@ -250,10 +252,10 @@ export default function DashboardPage() {
               </div>
 
               {/* Mini iframe / visual preview */}
-              <div className="rounded-2xl overflow-hidden border border-zinc-200/50 dark:border-zinc-800/60 bg-zinc-950">
+              <div className="rounded-2xl overflow-hidden border border-zinc-300 dark:border-zinc-700 bg-zinc-950">
                 <div className="aspect-video w-full bg-zinc-900 flex items-center justify-center">
                   <iframe
-                    src={activeRoom.canva_presentation_url || "https://www.canva.com/design/DAFv3sI7p9k/view?embed"}
+                    src={selectedRoom?.canva_presentation_url || "https://www.canva.com/design/DAFv3sI7p9k/view?embed"}
                     title="Apresentação Canva"
                     allowFullScreen
                     className="w-full h-full border-0"
@@ -262,12 +264,12 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex items-center justify-between text-xs pt-1">
-                <span className="text-zinc-400">Design Colaborativo</span>
+                <span className="text-zinc-500 font-medium">Design Colaborativo</span>
                 <a
-                  href="https://www.canva.com"
+                  href={selectedRoom?.canva_presentation_url?.replace("?embed", "") || "https://www.canva.com"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-purple-500 font-semibold hover:underline"
+                  className="text-purple-600 dark:text-purple-400 font-bold hover:underline"
                 >
                   Abrir no Canva ↗
                 </a>
@@ -275,18 +277,18 @@ export default function DashboardPage() {
             </div>
 
             {/* Chat em Tempo Real Teaser */}
-            <div className="rounded-3xl glass-panel p-6 border space-y-3.5">
+            <div className="rounded-3xl glass-panel p-6 border border-zinc-300 dark:border-zinc-800 space-y-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
                     <MessageSquare className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                      Chat em Tempo Real
+                    <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                      Chat da Sala
                     </h3>
-                    <p className="text-[11px] text-zinc-400">
-                      Últimas mensagens da turma
+                    <p className="text-[11px] text-zinc-500">
+                      Comunicação com a turma
                     </p>
                   </div>
                 </div>
@@ -299,10 +301,18 @@ export default function DashboardPage() {
               </div>
 
               <div className="space-y-2 pt-1">
-                {INITIAL_MESSAGES.slice(-2).map((msg) => (
+                {(messages.length > 0 ? messages.slice(-2) : [
+                  {
+                    id: "msg-welcome",
+                    room_id: selectedRoom?.id || "sala-principal",
+                    user: user,
+                    content: `Olá pessoal! Bem-vindos à sala ${selectedRoom?.name || "de estudos"}.`,
+                    created_at: "2026-10-28T18:00:00Z",
+                  }
+                ]).map((msg) => (
                   <div
                     key={msg.id}
-                    className="p-3 rounded-2xl glass-subtle border text-xs flex items-start gap-2.5"
+                    className="p-3 rounded-2xl glass-subtle border border-zinc-200 dark:border-zinc-800 text-xs flex items-start gap-2.5"
                   >
                     <img
                       src={msg.user.avatar_url}
@@ -311,14 +321,14 @@ export default function DashboardPage() {
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+                        <span className="font-bold text-zinc-900 dark:text-zinc-100">
                           {msg.user.display_name}
                         </span>
-                        <span className="text-[10px] text-zinc-400">
+                        <span className="text-[10px] text-zinc-500 font-medium">
                           {msg.user.custom_role}
                         </span>
                       </div>
-                      <p className="text-zinc-600 dark:text-zinc-300 truncate mt-0.5">
+                      <p className="text-zinc-700 dark:text-zinc-300 truncate mt-0.5">
                         {msg.content}
                       </p>
                     </div>

@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { AppleModal } from "@/components/ui/apple-modal";
 import { AppleButton } from "@/components/ui/apple-button";
 import { KeyRound, CheckCircle2, AlertCircle } from "lucide-react";
-import { INITIAL_ROOMS } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
+import { useRouter } from "next/navigation";
 
 interface JoinRoomModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ interface JoinRoomModalProps {
 }
 
 export function JoinRoomModal({ isOpen, onClose, onJoinSuccess }: JoinRoomModalProps) {
+  const router = useRouter();
+  const { joinRoomByCode } = useUser();
   const [code, setCode] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -30,26 +33,24 @@ export function JoinRoomModal({ isOpen, onClose, onJoinSuccess }: JoinRoomModalP
 
     setStatus("loading");
 
-    // Simulação com validação instantânea no mock / Supabase
     setTimeout(() => {
-      const found = INITIAL_ROOMS.find(
-        (r) => r.invite_code.toUpperCase() === cleanCode
-      );
+      const result = joinRoomByCode(cleanCode);
 
-      if (found) {
+      if (result.success && result.room) {
         setStatus("success");
-        setMatchedRoom(found.name);
+        setMatchedRoom(result.room.name);
         setTimeout(() => {
-          onJoinSuccess?.(found.name);
+          onJoinSuccess?.(result.room!.name);
           onClose();
           setStatus("idle");
           setCode("");
-        }, 1200);
+          router.push(`/rooms/${result.room!.id}`);
+        }, 1000);
       } else {
         setStatus("error");
-        setErrorMessage("Código inválido ou sala não encontrada. Tente LUMINA-7821 ou APPLE-4092.");
+        setErrorMessage("Código inválido ou sala não encontrada.");
       }
-    }, 600);
+    }, 400);
   };
 
   return (

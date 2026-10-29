@@ -14,8 +14,9 @@ import { AppleButton } from "@/components/ui/apple-button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { JoinRoomModal } from "@/components/rooms/join-room-modal";
 import { InteractiveGuideModal } from "@/components/guide/interactive-guide-modal";
-import { INITIAL_ROOMS, CURRENT_USER, Room } from "@/lib/mock-data";
+import { Room } from "@/lib/mock-data";
 import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/lib/user-context";
 
 interface HeaderProps {
   onToggleMobileMenu: () => void;
@@ -28,6 +29,7 @@ export function Header({
   selectedRoom,
   onSelectRoom,
 }: HeaderProps) {
+  const { rooms, user, setShowLoginModal } = useUser();
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [guideModalOpen, setGuideModalOpen] = useState(false);
   const [roomDropdownOpen, setRoomDropdownOpen] = useState(false);
@@ -80,24 +82,24 @@ export function Header({
                     Minhas Salas de Aula
                   </p>
                   <div className="space-y-1">
-                    {INITIAL_ROOMS.map((room) => (
+                    {rooms.map((room) => (
                       <button
                         key={room.id}
                         onClick={() => {
                           onSelectRoom(room);
                           setRoomDropdownOpen(false);
                         }}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-100/80 dark:hover:bg-zinc-800/70 apple-spring text-left cursor-pointer"
+                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 apple-spring text-left cursor-pointer"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">
                             {room.name}
                           </p>
-                          <span className="text-[10px] text-zinc-400">
+                          <span className="text-[10px] text-zinc-600 dark:text-zinc-400">
                             Código: {room.invite_code} • {room.members_count} alunos
                           </span>
                         </div>
-                        {selectedRoom.id === room.id && (
+                        {selectedRoom?.id === room.id && (
                           <Check className="h-4 w-4 text-blue-500 shrink-0 ml-2" />
                         )}
                       </button>
@@ -189,11 +191,25 @@ export function Header({
           <ThemeToggle />
 
           {/* User mini status */}
-          <div className="hidden lg:flex items-center gap-2 pl-2 border-l border-zinc-200/50 dark:border-zinc-800/60">
-            <Badge variant={CURRENT_USER.role_color} size="sm">
-              <Sparkles className="h-2.5 w-2.5" />
-              {CURRENT_USER.custom_role}
-            </Badge>
+          <div
+            onClick={() => setShowLoginModal(true)}
+            className="hidden lg:flex items-center gap-2 pl-2 border-l border-zinc-300 dark:border-zinc-800 cursor-pointer"
+            title="Clique para trocar de conta ou nome"
+          >
+            <img
+              src={user.avatar_url}
+              alt={user.display_name}
+              className="h-7 w-7 rounded-full object-cover ring-1 ring-blue-500"
+            />
+            <div className="text-left">
+              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block leading-tight">
+                {user.display_name}
+              </span>
+              <Badge variant={user.role_color} size="sm">
+                <Sparkles className="h-2.5 w-2.5" />
+                {user.custom_role}
+              </Badge>
+            </div>
           </div>
         </div>
       </header>

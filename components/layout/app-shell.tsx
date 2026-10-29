@@ -3,11 +3,11 @@
 import React, { useState } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
-import { Room, INITIAL_ROOMS } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<Room>(INITIAL_ROOMS[0]);
+  const { selectedRoom, setSelectedRoom } = useUser();
 
   return (
     <div className="min-h-screen flex flex-col md:pl-64 apple-spring">

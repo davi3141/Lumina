@@ -6,12 +6,13 @@ import { RoomCard } from "@/components/rooms/room-card";
 import { JoinRoomModal } from "@/components/rooms/join-room-modal";
 import { AppleModal } from "@/components/ui/apple-modal";
 import { AppleButton } from "@/components/ui/apple-button";
-import { INITIAL_ROOMS, Room, CURRENT_USER } from "@/lib/mock-data";
+import { useUser } from "@/lib/user-context";
 import { Plus, KeyRound, Search, DoorOpen, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function RoomsPage() {
-  const [rooms, setRooms] = useState<Room[]>(INITIAL_ROOMS);
-  const [activeRoomId, setActiveRoomId] = useState<string>(rooms[0]?.id || "");
+  const router = useRouter();
+  const { rooms, createRoom, selectedRoom, setSelectedRoom } = useUser();
   const [joinModalOpen, setJoinModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -26,29 +27,21 @@ export default function RoomsPage() {
     e.preventDefault();
     if (!newRoomName.trim()) return;
 
-    // Gerador de código único estilo Apple/Lumina
-    const randomCode = `LUMINA-${Math.floor(1000 + Math.random() * 9000)}`;
+    const created = createRoom(
+      newRoomName.trim(),
+      newRoomSubject.trim() || "Geral",
+      newRoomDesc.trim() || "Sala de estudos criada por você.",
+      newRoomCanva.trim() || undefined
+    );
 
-    const newRoom: Room = {
-      id: `room-${Date.now()}`,
-      name: newRoomName.trim(),
-      subject: newRoomSubject.trim() || "Geral",
-      description: newRoomDesc.trim() || "Sala de estudos colaborativos.",
-      invite_code: randomCode,
-      owner_id: CURRENT_USER.id,
-      members_count: 1,
-      banner_gradient: "from-blue-600/30 via-indigo-500/20 to-purple-600/30",
-      canva_presentation_url: newRoomCanva.trim() || undefined,
-      created_at: new Date().toISOString(),
-    };
-
-    setRooms([newRoom, ...rooms]);
-    setActiveRoomId(newRoom.id);
     setCreateModalOpen(false);
     setNewRoomName("");
     setNewRoomSubject("");
     setNewRoomDesc("");
     setNewRoomCanva("");
+
+    // Navega diretamente para a nova sala
+    router.push(`/rooms/${created.id}`);
   };
 
   const filtered = rooms.filter(
@@ -116,8 +109,8 @@ export default function RoomsPage() {
             <RoomCard
               key={room.id}
               room={room}
-              isActive={room.id === activeRoomId}
-              onSelect={(r) => setActiveRoomId(r.id)}
+              isActive={room.id === selectedRoom?.id}
+              onSelect={(r) => setSelectedRoom(r)}
             />
           ))}
         </div>

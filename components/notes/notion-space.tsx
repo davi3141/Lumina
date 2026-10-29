@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Note, INITIAL_NOTES } from "@/lib/mock-data";
+import { Note } from "@/lib/mock-data";
 import {
   Plus,
   Trash2,
@@ -10,15 +10,15 @@ import {
   CheckCircle,
   FileText,
   Sparkles,
-  CloudCheck,
 } from "lucide-react";
 import { AppleButton } from "@/components/ui/apple-button";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/lib/user-context";
 
 const EMOJI_OPTIONS = ["📝", "🍎", "⚡", "💡", "📐", "🔬", "🚀", "✨"];
 
 export function NotionSpace() {
-  const [notes, setNotes] = useState<Note[]>(INITIAL_NOTES);
+  const { notes, createNote, updateNote, deleteNote } = useUser();
   const [selectedNoteId, setSelectedNoteId] = useState<string>(notes[0]?.id || "");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSavedIndicator, setIsSavedIndicator] = useState(true);
@@ -26,25 +26,15 @@ export function NotionSpace() {
   const selectedNote = notes.find((n) => n.id === selectedNoteId) || notes[0];
 
   const handleUpdateNote = (field: keyof Note, value: any) => {
+    if (!selectedNote) return;
     setIsSavedIndicator(false);
-    setNotes((prev) =>
-      prev.map((n) => (n.id === selectedNoteId ? { ...n, [field]: value } : n))
-    );
-    setTimeout(() => setIsSavedIndicator(true), 600);
+    updateNote(selectedNote.id, { [field]: value });
+    setTimeout(() => setIsSavedIndicator(true), 400);
   };
 
   const handleCreateNote = () => {
-    const newNote: Note = {
-      id: `note-${Date.now()}`,
-      title: "Nova Página sem Título",
-      content: "# Novo Resumo\n\nComece a digitar suas ideias ou crie suas tarefas:\n- [ ] Revisar conteúdo\n- [ ] Praticar exercícios",
-      icon: "📝",
-      category: "Geral",
-      is_favorite: false,
-      updated_at: new Date().toISOString(),
-    };
-    setNotes([newNote, ...notes]);
-    setSelectedNoteId(newNote.id);
+    const created = createNote("Nova Anotação de Estudos");
+    setSelectedNoteId(created.id);
   };
 
   const handleDeleteNote = (id: string) => {
@@ -52,9 +42,9 @@ export function NotionSpace() {
       alert("Mantenha ao menos uma nota no seu caderno.");
       return;
     }
+    deleteNote(id);
     const remaining = notes.filter((n) => n.id !== id);
-    setNotes(remaining);
-    setSelectedNoteId(remaining[0].id);
+    if (remaining.length > 0) setSelectedNoteId(remaining[0].id);
   };
 
   const filteredNotes = notes.filter((n) =>

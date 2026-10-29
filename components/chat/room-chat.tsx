@@ -1,23 +1,28 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ChatMessage, CURRENT_USER, Room } from "@/lib/mock-data";
+import { ChatMessage, Room } from "@/lib/mock-data";
 import { Send, Image, ExternalLink, Smile, Shield } from "lucide-react";
 import { AppleButton } from "@/components/ui/apple-button";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatTimeAgo } from "@/lib/utils";
+import { useUser } from "@/lib/user-context";
 
 interface RoomChatProps {
   room: Room;
-  initialMessages: ChatMessage[];
+  initialMessages?: ChatMessage[];
 }
 
-export function RoomChat({ room, initialMessages }: RoomChatProps) {
-  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
+export function RoomChat({ room, initialMessages = [] }: RoomChatProps) {
+  const { user, messages: contextMessages, sendMessage } = useUser();
   const [inputContent, setInputContent] = useState("");
   const [canvaLink, setCanvaLink] = useState("");
   const [showCanvaInput, setShowCanvaInput] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Filtra as mensagens pertencentes a esta sala
+  const activeRoomMessages = contextMessages.filter((m) => m.room_id === room.id);
+  const displayMessages = activeRoomMessages.length > 0 ? activeRoomMessages : initialMessages;
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,22 +30,13 @@ export function RoomChat({ room, initialMessages }: RoomChatProps) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [displayMessages]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputContent.trim()) return;
 
-    const newMessage: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      room_id: room.id,
-      user: CURRENT_USER,
-      content: inputContent.trim(),
-      canva_attachment_url: canvaLink.trim() || undefined,
-      created_at: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, newMessage]);
+    sendMessage(room.id, inputContent.trim(), canvaLink.trim() || undefined);
     setInputContent("");
     setCanvaLink("");
     setShowCanvaInput(false);
@@ -58,7 +54,7 @@ export function RoomChat({ room, initialMessages }: RoomChatProps) {
             </h3>
           </div>
           <p className="text-[11px] text-zinc-400 mt-0.5">
-            Canal em tempo real • {messages.length} mensagens
+            Canal em tempo real • {displayMessages.length} mensagens
           </p>
         </div>
 
@@ -69,8 +65,8 @@ export function RoomChat({ room, initialMessages }: RoomChatProps) {
 
       {/* Messages Stream */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
-        {messages.map((msg) => {
-          const isCurrentUser = msg.user.id === CURRENT_USER.id;
+        {displayMessages.map((msg) => {
+          const isCurrentUser = msg.user.id === user.id;
 
           return (
             <div

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { AppShell } from "@/components/layout/app-shell";
-import { Task, INITIAL_TASKS } from "@/lib/mock-data";
+import { Task } from "@/lib/mock-data";
 import {
   CheckSquare,
   Plus,
@@ -18,9 +18,10 @@ import { AppleButton } from "@/components/ui/apple-button";
 import { Badge } from "@/components/ui/badge";
 import { AppleModal } from "@/components/ui/apple-modal";
 import { cn, formatDate } from "@/lib/utils";
+import { useUser } from "@/lib/user-context";
 
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+  const { tasks, createTask, toggleTaskStatus, selectedRoom } = useUser();
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "in_progress" | "completed">("all");
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [notifyingId, setNotifyingId] = useState<string | null>(null);
@@ -37,19 +38,15 @@ export default function TasksPage() {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
-    const newTask: Task = {
-      id: `tsk-${Date.now()}`,
-      room_id: "room-alpha",
-      title: newTitle.trim(),
-      description: "Atividade cadastrada no mural da turma.",
-      subject: newSubject.trim() || "Geral",
-      due_date: newDueDate || new Date(Date.now() + 86400000 * 3).toISOString(),
-      priority: newPriority,
-      status: "pending",
-      canva_link: newCanvaLink.trim() || undefined,
-    };
+    createTask(
+      newTitle.trim(),
+      newSubject.trim() || selectedRoom?.subject || "Geral",
+      newDueDate,
+      newPriority,
+      newCanvaLink.trim() || undefined,
+      selectedRoom?.id
+    );
 
-    setTasks([newTask, ...tasks]);
     setIsCreateModalOpen(false);
     setNewTitle("");
     setNewSubject("");
@@ -58,20 +55,7 @@ export default function TasksPage() {
   };
 
   const handleToggleStatus = (id: string) => {
-    setTasks((prev) =>
-      prev.map((t) => {
-        if (t.id === id) {
-          const next =
-            t.status === "completed"
-              ? "pending"
-              : t.status === "pending"
-              ? "in_progress"
-              : "completed";
-          return { ...t, status: next };
-        }
-        return t;
-      })
-    );
+    toggleTaskStatus(id);
   };
 
   const handleSendEmailReminder = async (task: Task) => {
